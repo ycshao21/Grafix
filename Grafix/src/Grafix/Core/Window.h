@@ -47,8 +47,6 @@ namespace Grafix
 
         static Unique<Window> Create(const WindowSpecification& spec);
     private:
-        WindowSpecification m_Spec;
-
         struct WindowData
         {
             std::string Title;

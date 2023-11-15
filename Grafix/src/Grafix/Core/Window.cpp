@@ -5,13 +5,20 @@
 #include "Events/KeyEvent.h"
 #include "Events/MouseEvent.h"
 
+#include "Grafix/Renderer/RendererAPI.h"
+
+#include <glad/glad.h>
+
 namespace Grafix
 {
     static bool s_GLFWInitialized = false;
 
     Window::Window(const WindowSpecification& spec)
-        : m_Spec(spec)
     {
+        m_Data.Title = spec.Title;
+        m_Data.Width = spec.Width;
+        m_Data.Height = spec.Height;
+        m_Data.VSync = spec.VSync;
     }
 
     Window::~Window()
@@ -21,6 +28,10 @@ namespace Grafix
 
     void Window::OnUpdate()
     {
+        // TEMP
+        glClearColor(1, 0, 1, 1);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        
         glfwPollEvents();
         glfwSwapBuffers(m_Window);
     }
@@ -38,11 +49,12 @@ namespace Grafix
 
     void Window::Init()
     {
-        // Get the window data
-        m_Data.Title = m_Spec.Title;
-        m_Data.Width = m_Spec.Width;
-        m_Data.Height = m_Spec.Height;
-        m_Data.VSync = m_Spec.VSync;
+
+        switch (RendererAPI::GetType())
+        {
+            case RendererAPIType::OpenGL: { m_Data.Title += " | OpenGL"; break; }
+            case RendererAPIType::Vulkan: { m_Data.Title += " | Vulkan"; break; }
+        }
 
         // Initialize GLFW
         if (!s_GLFWInitialized)
@@ -59,8 +71,8 @@ namespace Grafix
 
         // Create a GLFW window
         {
-            GF_CORE_INFO("Creating window: {0}({1} ¡Á {2})", m_Spec.Title, m_Spec.Width, m_Spec.Height);
-            m_Window = glfwCreateWindow(m_Spec.Width, m_Spec.Height, m_Spec.Title.c_str(), nullptr, nullptr);
+            GF_CORE_INFO("Creating window: {0}({1} ¡Á {2})", m_Data.Title, m_Data.Width, m_Data.Height);
+            m_Window = glfwCreateWindow(m_Data.Width, m_Data.Height, m_Data.Title.c_str(), nullptr, nullptr);
         }
 
         // Initialize context
@@ -68,6 +80,10 @@ namespace Grafix
 
         glfwSetWindowUserPointer(m_Window, &m_Data);
         SetVSync(m_Data.VSync);
+
+        // Initialize Glad
+        int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+        GF_CORE_ASSERT(status, "Failed to initialize Glad!");
 
         // Set GLFW callbacks
 

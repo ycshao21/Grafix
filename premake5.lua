@@ -14,6 +14,7 @@ workspace "Grafix"
 IncludeDir = {}
 IncludeDir["Vulkan"] = "%{VULKAN}/Include"
 IncludeDir["glfw"] = "Grafix/vendor/glfw/include"
+IncludeDir["Glad"] = "Grafix/vendor/Glad/include"
 IncludeDir["glm"] = "Grafix/vendor/glm"
 
 Library = {}
@@ -24,6 +25,7 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 group "Dependencies"
     include "Grafix/vendor/glfw"
+    include "Grafix/vendor/Glad"
 group ""
 
 
@@ -52,6 +54,7 @@ project "Grafix"
     {
         "%{prj.name}/src",
         "%{prj.name}/vendor/spdlog/include",
+        "%{IncludeDir.Glad}",
         "%{IncludeDir.Vulkan}",
         "%{IncludeDir.glfw}",
         "%{IncludeDir.glm}"
@@ -60,7 +63,9 @@ project "Grafix"
     links
     {
         "GLFW",
-        "%{Library.Vulkan}"
+        "%{Library.Vulkan}",
+        "opengl32.lib",
+        "Glad",
     }
 
     filter "system:windows"
@@ -68,7 +73,8 @@ project "Grafix"
 
         defines
         {
-            "GF_PLATFORM_WINDOWS"
+            "GF_PLATFORM_WINDOWS",
+            "GLFW_INCLUDE_NONE"
         }
         
     filter "configurations:Debug"
@@ -107,8 +113,9 @@ project "Sandbox"
         "Grafix/src",
         "Grafix/vendor",
         "Grafix/vendor/spdlog/include",
+        "%{IncludeDir.glfw}",
         "%{IncludeDir.Vulkan}",
-        "%{IncludeDir.glfw}"
+        "%{IncludeDir.Glad}"
     }
 
     links { "Grafix" }
