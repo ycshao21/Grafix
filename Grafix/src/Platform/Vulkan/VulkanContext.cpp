@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "VulkanContext.h"
 
+#include <GLFW/glfw3.h>
+
 namespace Grafix
 {
 #ifdef GF_CONFIG_DEBUG
@@ -17,7 +19,7 @@ namespace Grafix
         vkEnumerateInstanceExtensionProperties(nullptr, &supportedExtensionCount, supportedExtensions.data());
 
         GF_CORE_DEBUG("Found {0} supported extensions:", supportedExtensionCount);
-        for (int i = 0; i < supportedExtensionCount; ++i)
+        for (uint32_t i = 0; i < supportedExtensionCount; ++i)
             GF_CORE_DEBUG("      {0}: {1}", i + 1, supportedExtensions[i].extensionName);
 
         for (auto& extension: extensions)
@@ -28,7 +30,7 @@ namespace Grafix
                 if (strcmp(extension, supportedExtension.extensionName) == 0)
                 {
                     found = true;
-                    GF_CORE_INFO("{0} is supported.", extension);
+                    GF_CORE_TRACE("{0} is supported.", extension);
                     break;
                 }
             }
@@ -47,7 +49,7 @@ namespace Grafix
         std::vector<VkLayerProperties> supportedLayers(supportedLayerCount);
         vkEnumerateInstanceLayerProperties(&supportedLayerCount, supportedLayers.data());
         GF_CORE_DEBUG("Found {0} supported layers:", supportedLayerCount);
-        for (int i = 0; i < supportedLayerCount; ++i)
+        for (uint32_t i = 0; i < supportedLayerCount; ++i)
             GF_CORE_DEBUG("      {0}: {1}", i + 1, supportedLayers[i].layerName);
 
         for (auto& layer: layers)
@@ -58,7 +60,7 @@ namespace Grafix
                 if (strcmp(layer, supportedLayer.layerName) == 0)
                 {
                     found = true;
-                    GF_CORE_INFO("{0} is supported.", layer);
+                    GF_CORE_TRACE("{0} is supported.", layer);
                     break;
                 }
             }
@@ -94,6 +96,8 @@ namespace Grafix
 
     VulkanContext::~VulkanContext()
     {
+        m_LogicalDevice->Destroy();
+
         auto vkDestroyDebugUtilsMessengerEXT =
             (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(s_Instance, "vkDestroyDebugUtilsMessengerEXT");
         GF_CORE_ASSERT(vkDestroyDebugUtilsMessengerEXT, "Could not load vkDestroyDebugUtilsMessengerEXT");
@@ -109,13 +113,19 @@ namespace Grafix
 
         CreateInstance();
         SetupDebugMessenger();
+        
         m_PhysicalDevice = VulkanPhysicalDevice::Pick();
+
+        VkPhysicalDeviceFeatures features{};
+        // No features for now.
+        // If features are needed, add them here.
+
+        m_LogicalDevice = VulkanLogicalDevice::Create(m_PhysicalDevice, features);
     }
 
     void VulkanContext::SwapBuffers()
     {
     }
-
 
     void VulkanContext::CreateInstance()
     {
@@ -138,7 +148,7 @@ namespace Grafix
 
         CheckExtensions(extensions);
 
-        instanceCI.enabledExtensionCount = extensions.size();
+        instanceCI.enabledExtensionCount = (uint32_t)extensions.size();
         instanceCI.ppEnabledExtensionNames = extensions.data();
 
         // Validation layer
@@ -151,7 +161,7 @@ namespace Grafix
             instanceCI.ppEnabledLayerNames = &validationLayer;
         }
 
-        vkCreateInstance(&instanceCI, nullptr, &s_Instance);
+        VK_CHECK(vkCreateInstance(&instanceCI, nullptr, &s_Instance));
     }
 
     void VulkanContext::SetupDebugMessenger()

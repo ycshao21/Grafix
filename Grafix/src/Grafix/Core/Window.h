@@ -14,10 +14,10 @@ namespace Grafix
 {
     struct WindowSpecification final
     {
-        std::string Title;
-        uint32_t Width;
-        uint32_t Height;
-        bool VSync;
+        std::string Title = "Grafix App";
+        uint32_t Width = 1280;
+        uint32_t Height = 720;
+        bool VSync = true;
     };
 
     class Window final

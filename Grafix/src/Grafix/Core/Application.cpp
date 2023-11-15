@@ -3,6 +3,8 @@
 
 #include "Grafix/Renderer/Renderer.h"
 
+#include <GLFW/glfw3.h>
+
 namespace Grafix
 {
     Application* Application::s_Instance = nullptr;

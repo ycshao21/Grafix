@@ -19,9 +19,6 @@
 #include <unordered_map>
 #include <unordered_set>
 
-// NOTE: The include order cannot be changed.
-#include <vulkan/vulkan.h>
-#include <GLFW/glfw3.h>
 #include <spdlog/spdlog.h>
 
 #include "Grafix/Core/Base.h"

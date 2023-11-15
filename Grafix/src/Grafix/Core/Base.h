@@ -14,14 +14,14 @@
 	#define GF_ASSERT(x, ...) { if(!(x)) { GF_ERROR("Assertion Failed: {0}", __VA_ARGS__); __debugbreak(); } }
 	
     #ifdef GF_PLATFORM_WINDOWS
-        #define GF_VK_CHECK(x, ...) { if(x != VK_SUCCESS) { GF_CORE_ERROR("Vulkan Error: {0}", __VA_ARGS__); __debugbreak(); } }
+        #define VK_CHECK(x) { if(x != VK_SUCCESS) { GF_CORE_ERROR("Vulkan Error!"); __debugbreak(); } }
     #endif
 #else
 	#define GF_CORE_ASSERT(x, ...)
 	#define GF_ASSERT(x, ...)
 
     #ifdef GF_PLATFORM_WINDOWS
-        #define GF_VK_CHECK(x, ...)
+        #define VK_CHECK(x)
     #endif
 #endif
 

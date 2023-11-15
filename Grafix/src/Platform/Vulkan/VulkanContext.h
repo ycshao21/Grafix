@@ -4,6 +4,7 @@
 
 #include "vulkan/vulkan.h"
 #include "VulkanPhysicalDevice.h"
+#include "VulkanLogicalDevice.h"
 
 struct GLFWwindow;
 
@@ -25,9 +26,12 @@ namespace Grafix
     private:
         GLFWwindow* m_WindowHandle;
 
+        // Instance
         static VkInstance s_Instance;
-        Shared<VulkanPhysicalDevice> m_PhysicalDevice = nullptr;
-
         VkDebugUtilsMessengerEXT m_DebugMessenger = nullptr;
+
+        // Devices
+        Shared<VulkanPhysicalDevice> m_PhysicalDevice = nullptr;
+        Shared<VulkanLogicalDevice> m_LogicalDevice = nullptr;
     };
 }
