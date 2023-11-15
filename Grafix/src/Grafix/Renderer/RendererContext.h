@@ -8,5 +8,7 @@ namespace Grafix
         virtual void Init() = 0;
 
         virtual void SwapBuffers() = 0;
+
+        static Shared<RendererContext> Create(void* windowHandle);
     };
 }

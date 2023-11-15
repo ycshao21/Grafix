@@ -1,6 +1,8 @@
 #pragma once
 #include "Grafix/Core/Window.h"
 
+#include "Grafix/Renderer/RendererContext.h"
+
 #include "Base.h"
 #include "Events/Event.h"
 
@@ -59,5 +61,6 @@ namespace Grafix
         WindowData m_Data;
 
         GLFWwindow* m_Window = nullptr;
+        Shared<RendererContext> m_Context = nullptr;
     };
 }

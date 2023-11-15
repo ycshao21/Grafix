@@ -19,6 +19,12 @@ namespace Grafix
         m_Data.Width = spec.Width;
         m_Data.Height = spec.Height;
         m_Data.VSync = spec.VSync;
+
+        switch (RendererAPI::GetType())
+        {
+            case RendererAPIType::OpenGL: { m_Data.Title += " | OpenGL"; break; }
+            case RendererAPIType::Vulkan: { m_Data.Title += " | Vulkan"; break; }
+        }
     }
 
     Window::~Window()
@@ -33,7 +39,7 @@ namespace Grafix
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
         glfwPollEvents();
-        glfwSwapBuffers(m_Window);
+        m_Context->SwapBuffers();
     }
 
     inline void Window::SetVSync(bool enabled)
@@ -49,14 +55,9 @@ namespace Grafix
 
     void Window::Init()
     {
-
-        switch (RendererAPI::GetType())
-        {
-            case RendererAPIType::OpenGL: { m_Data.Title += " | OpenGL"; break; }
-            case RendererAPIType::Vulkan: { m_Data.Title += " | Vulkan"; break; }
-        }
-
+        // ------------------------------------------------------------------------------------------------------------------------------------------
         // Initialize GLFW
+        // ------------------------------------------------------------------------------------------------------------------------------------------
         if (!s_GLFWInitialized)
         {
             int success = glfwInit();
@@ -69,24 +70,26 @@ namespace Grafix
             });
         }
 
-        // Create a GLFW window
+        // ------------------------------------------------------------------------------------------------------------------------------------------
+        // Create GLFW Window
+        // ------------------------------------------------------------------------------------------------------------------------------------------
         {
             GF_CORE_INFO("Creating window: {0}({1} ¡Á {2})", m_Data.Title, m_Data.Width, m_Data.Height);
             m_Window = glfwCreateWindow(m_Data.Width, m_Data.Height, m_Data.Title.c_str(), nullptr, nullptr);
         }
 
-        // Initialize context
-        glfwMakeContextCurrent(m_Window);
+        // ------------------------------------------------------------------------------------------------------------------------------------------
+        // Initialize Renderer Context
+        // ------------------------------------------------------------------------------------------------------------------------------------------
+        m_Context = RendererContext::Create(m_Window);
+        m_Context->Init();
 
         glfwSetWindowUserPointer(m_Window, &m_Data);
         SetVSync(m_Data.VSync);
 
-        // Initialize Glad
-        int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-        GF_CORE_ASSERT(status, "Failed to initialize Glad!");
-
-        // Set GLFW callbacks
-
+        // ------------------------------------------------------------------------------------------------------------------------------------------
+        // Set GLFW Callbacks
+        // ------------------------------------------------------------------------------------------------------------------------------------------
         glfwSetWindowSizeCallback(m_Window, [](GLFWwindow* window, int width, int height)
         {
             WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
