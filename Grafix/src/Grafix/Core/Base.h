@@ -4,7 +4,7 @@
 
 #include <memory>
 
-#ifdef GF_DEBUG
+#ifdef GF_CONFIG_DEBUG
     #define GF_ENABLE_ASSERTS
 #endif
 

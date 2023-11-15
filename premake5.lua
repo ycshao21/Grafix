@@ -78,17 +78,17 @@ project "Grafix"
         }
         
     filter "configurations:Debug"
-        defines "GF_DEBUG"
+        defines "GF_CONFIG_DEBUG"
         runtime "Debug"
         symbols "on"
 
     filter "configurations:Release"
-        defines "GF_RELEASE"
+        defines "GF_CONFIG_RELEASE"
         runtime "Release"
         optimize "on"
 
     filter "configurations:Dist"
-        defines "GF_DIST"
+        defines "GF_CONFIG_DIST"
         optimize "on"
 
 
@@ -125,15 +125,15 @@ project "Sandbox"
         defines { "GF_PLATFORM_WINDOWS" }        
 
     filter "configurations:Debug"
-        defines "GF_DEBUG"
+        defines "GF_CONFIG_DEBUG"
         runtime "Debug"
         symbols "on"
 
     filter "configurations:Release"
-        defines "GF_RELEASE"
+        defines "GF_CONFIG_RELEASE"
         runtime "Release"
         optimize "on"
 
     filter "configurations:Dist"
-        defines "GF_DIST"
+        defines "GF_CONFIG_DIST"
         optimize "on"

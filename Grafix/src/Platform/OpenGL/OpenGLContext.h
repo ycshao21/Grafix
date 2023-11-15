@@ -10,8 +10,9 @@ namespace Grafix
     {
     public:
         OpenGLContext(GLFWwindow* windowHandle);
-        virtual void Init() override;
+        virtual ~OpenGLContext() = default;
 
+        virtual void Init() override;
         virtual void SwapBuffers() override;
     private:
         GLFWwindow* m_WindowHandle;

@@ -35,8 +35,8 @@ namespace Grafix
     void Window::OnUpdate()
     {
         // TEMP
-        glClearColor(1, 0, 1, 1);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        ////glClearColor(1, 0, 1, 1);
+        ////glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
         glfwPollEvents();
         m_Context->SwapBuffers();
@@ -44,8 +44,21 @@ namespace Grafix
 
     inline void Window::SetVSync(bool enabled)
     {
-        glfwSwapInterval(enabled ? 1 : 0);
         m_Data.VSync = enabled;
+
+        switch (RendererAPI::GetType())
+        {
+            case RendererAPIType::OpenGL:
+            {
+                glfwSwapInterval(enabled ? 1 : 0);
+                break;
+            }
+            case RendererAPIType::Vulkan:
+            {
+                // TODO: swapchain->SetVSync(enabled);
+                break;
+            }
+        }
     }
 
     Unique<Window> Window::Create(const WindowSpecification& spec)
@@ -74,7 +87,16 @@ namespace Grafix
         // Create GLFW Window
         // ------------------------------------------------------------------------------------------------------------------------------------------
         {
-            GF_CORE_INFO("Creating window: {0}({1} ¡Á {2})", m_Data.Title, m_Data.Width, m_Data.Height);
+            // Vulkan: Since we are using Vulkan, we don't need GLFW to create an OpenGL context.
+            glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+
+            // Vulkan: Window resizing will break the swapchain, so we disable it here.
+            //         When resizing is supported by the swapchain, this can be removed.
+            glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+
+            GF_CORE_INFO("Creating window: {0} ({1} ¡Á {2})", m_Data.Title, m_Data.Width, m_Data.Height);
+
+            // If we need fullscreen, we need to set the 4th parameter to glfwGetPrimaryMonitor()
             m_Window = glfwCreateWindow(m_Data.Width, m_Data.Height, m_Data.Title.c_str(), nullptr, nullptr);
         }
 
