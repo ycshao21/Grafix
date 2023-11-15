@@ -26,7 +26,6 @@ namespace Grafix
     void Input::SetCursorMode(CursorMode mode)
     {
         GLFWwindow* windowHandle = (GLFWwindow*)Application::Get().GetWindow().GetNative();
-
         glfwSetInputMode(windowHandle, GLFW_CURSOR, GLFW_CURSOR_NORMAL + (int)mode);
     }
 

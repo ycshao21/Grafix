@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Event.h"
-#include "Grafix/Input/Codes.h"
+#include "Grafix/Core/Input/Codes.h"
 
 namespace Grafix
 {
@@ -26,9 +26,7 @@ namespace Grafix
 
         std::string ToString() const override
         {
-            std::stringstream ss;
-            ss << "KeyPressedEvent: " << (uint16_t)m_Key << " (repeat = " << (uint16_t)m_IsRepeat << ")";
-            return ss.str();
+            return std::format("KeyPressedEvent: {0} (repeat = {1})", (uint16_t)m_Key, (uint16_t)m_IsRepeat);
         }
 
         EVENT_CLASS_TYPE(KeyPressed)
@@ -43,9 +41,7 @@ namespace Grafix
 
         std::string ToString() const override
         {
-            std::stringstream ss;
-            ss << "KeyReleasedEvent: " << (uint16_t)m_Key;
-            return ss.str();
+            return std::format("KeyReleasedEvent: {0}", (uint16_t)m_Key);
         }
 
         EVENT_CLASS_TYPE(KeyReleased)
@@ -58,9 +54,7 @@ namespace Grafix
 
         std::string ToString() const override
         {
-            std::stringstream ss;
-            ss << "KeyTypedEvent: " << (uint16_t)m_Key;
-            return ss.str();
+            return std::format("KeyTypedEvent: {0}", (uint16_t)m_Key);
         }
 
         EVENT_CLASS_TYPE(KeyTyped)

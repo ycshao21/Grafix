@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Grafix/Events/Event.h"
+#include "Events/Event.h"
 
 namespace Grafix
 {

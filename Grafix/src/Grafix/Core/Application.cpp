@@ -1,8 +1,6 @@
 #include "pch.h"
 #include "Application.h"
 
-#include "Base.h"
-
 namespace Grafix
 {
     Application* Application::s_Instance = nullptr;
@@ -10,11 +8,16 @@ namespace Grafix
     Application::Application(const ApplicationSpecification& spec)
     {
         s_Instance = this;
-        Logging::Init();
 
-        m_Window = Window::Create(WindowSpecification(spec.Name, spec.Width, spec.Height));
+        WindowSpecification windowSpec;
+        windowSpec.Title = spec.Name;
+        windowSpec.Width = spec.WindowWidth;
+        windowSpec.Height = spec.WindowHeight;
+        windowSpec.VSync = spec.VSync;
+
+        m_Window = Window::Create(windowSpec);
         m_Window->Init();
-        m_Window->SetEventCallback(BIND_EVENT_FN(Application::OnEvent));
+        m_Window->SetEventCallback([this](Event& e) { OnEvent(e); });
     }
 
     Application::~Application()
@@ -24,7 +27,7 @@ namespace Grafix
     void Application::OnEvent(Event& e)
     {
         EventDispatcher dispatcher(e);
-        dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(Application::OnWindowClose));
+        dispatcher.Dispatch<WindowCloseEvent>([this](WindowCloseEvent& e) { return OnWindowClose(e); });
 
         for (auto it = m_LayerStack.end(); it != m_LayerStack.begin(); )
         {
@@ -60,6 +63,6 @@ namespace Grafix
     bool Application::OnWindowClose(WindowCloseEvent& e)
     {
         m_IsRunning = false;
-        return true;
+        return false;
     }
 }

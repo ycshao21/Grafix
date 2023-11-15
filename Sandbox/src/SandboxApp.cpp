@@ -1,7 +1,7 @@
 #include "Grafix.h"
 #include "Grafix/Core/EntryPoint.h"
 
-#include "SandboxLayer.h"
+#include "TestLayer.h"
 
 class Sandbox : public Grafix::Application
 {
@@ -9,7 +9,7 @@ public:
     Sandbox(const Grafix::ApplicationSpecification& spec)
         : Application(spec)
     {
-        PushLayer(new SandboxLayer());
+        PushLayer(new TestLayer());
     }
 
     ~Sandbox()
@@ -19,6 +19,11 @@ public:
 
 Grafix::Application* Grafix::CreateApplication()
 {
-    ApplicationSpecification spec("Sandbox", 1600, 900);
+    ApplicationSpecification spec;
+    spec.Name = "Grafix";
+    spec.WindowWidth = 1600;
+    spec.WindowHeight = 900;
+    spec.VSync = true;
+
     return new Sandbox(spec);
 }

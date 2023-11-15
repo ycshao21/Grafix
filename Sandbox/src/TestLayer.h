@@ -2,11 +2,11 @@
 
 #include "Grafix.h"
 
-class SandboxLayer : public Grafix::Layer
+class TestLayer : public Grafix::Layer
 {
 public:
-    SandboxLayer();
-    virtual ~SandboxLayer();
+    TestLayer();
+    virtual ~TestLayer();
 
     virtual void OnUpdate(float ts) override;
 };

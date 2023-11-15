@@ -8,8 +8,8 @@
 #include <algorithm>
 #include <functional>
 
+#include <format>
 #include <string>
-#include <sstream>
 #include <array>
 #include <vector>
 #include <stack>

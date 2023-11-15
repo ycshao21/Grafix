@@ -2,7 +2,7 @@
 #include "Grafix/Core/Window.h"
 
 #include "Base.h"
-#include "Grafix/Events/Event.h"
+#include "Events/Event.h"
 
 #include <string>
 
@@ -17,11 +17,6 @@ namespace Grafix
         uint32_t Width;
         uint32_t Height;
         bool VSync;
-
-        WindowSpecification(const std::string& title, uint32_t width, uint32_t height)
-            : Title(title), Width(width), Height(height)
-        {
-        }
     };
 
     class Window final

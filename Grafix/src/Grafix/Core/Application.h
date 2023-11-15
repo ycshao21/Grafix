@@ -3,15 +3,16 @@
 #include "Window.h"
 #include "LayerStack.h"
 
-#include "Grafix/Events/ApplicationEvent.h"
+#include "Events/ApplicationEvent.h"
 
 namespace Grafix
 {
     struct ApplicationSpecification final
     {
         std::string Name = "Grafix App";
-        uint32_t Width = 1440;
-        uint32_t Height = 810;
+        uint32_t WindowWidth = 1280;
+        uint32_t WindowHeight = 720;
+        bool VSync = true;
     };
 
     class Application

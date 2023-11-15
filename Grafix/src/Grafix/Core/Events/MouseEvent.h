@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Event.h"
-#include "Grafix/Input/Codes.h"
+#include "Grafix/Core/Input/Codes.h"
 
 namespace Grafix
 {
@@ -15,9 +15,7 @@ namespace Grafix
 
         std::string ToString() const override
         {
-            std::stringstream ss;
-            ss << "MouseMovedEvent: (" << m_MouseX << ", " << m_MouseY << ")";
-            return ss.str();
+            return std::format("MouseMovedEvent: ({0}, {1})", m_MouseX, m_MouseY);
         }
 
         EVENT_CLASS_TYPE(MouseMoved)
@@ -36,13 +34,11 @@ namespace Grafix
 
         std::string ToString() const override
         {
-            std::stringstream ss;
-            ss << "MouseScrolledEvent: (" << m_XOffset << ", " << m_YOffset << ")";
-            return ss.str();
+            return std::format("MouseScrolledEvent: ({0}, {1})", m_XOffset, m_YOffset);
         }
 
         EVENT_CLASS_TYPE(MouseScrolled)
-            EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput)
+        EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput)
     protected:
         float m_XOffset, m_YOffset;
     };
@@ -55,7 +51,6 @@ namespace Grafix
         EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput)
     protected:
         MouseButtonEvent(MouseButton button) : m_Button(button) {}
-
         MouseButton m_Button;
     };
 
@@ -66,9 +61,7 @@ namespace Grafix
 
         std::string ToString() const override
         {
-            std::stringstream ss;
-            ss << "MouseButtonPressedEvent: " << (uint16_t)m_Button;
-            return ss.str();
+            return std::format("MouseButtonPressedEvent: {0}", (uint16_t)m_Button);
         }
 
         EVENT_CLASS_TYPE(MouseButtonPressed)
@@ -81,9 +74,7 @@ namespace Grafix
 
         std::string ToString() const override
         {
-            std::stringstream ss;
-            ss << "MouseButtonReleasedEvent: " << (uint16_t)m_Button;
-            return ss.str();
+            return std::format("MouseButtonReleasedEvent: {0}", (uint16_t)m_Button);
         }
 
         EVENT_CLASS_TYPE(MouseButtonReleased)
