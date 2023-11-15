@@ -1,0 +1,9 @@
+[submodule "Grafix/vendor/glfw"]
+	path = Grafix/vendor/glfw
+	url = https://github.com/ycshao21/glfw
+[submodule "Grafix/vendor/glm"]
+	path = Grafix/vendor/glm
+	url = https://github.com/g-truc/glm
+[submodule "Grafix/vendor/spdlog"]
+	path = Grafix/vendor/spdlog
+	url = https://github.com/gabime/spdlog
