@@ -5,6 +5,8 @@
 
 #include "Events/ApplicationEvent.h"
 
+#include "Grafix/Renderer/Shader.h"
+
 namespace Grafix
 {
     struct ApplicationSpecification final
@@ -39,6 +41,11 @@ namespace Grafix
 
         float m_LastFrameTime = 0.0f;
         static Application* s_Instance;
+
+        // TEMP
+        uint32_t m_VertexArray, m_VertexBuffer, m_IndexBuffer;
+
+        Unique<Shader> m_Shader = nullptr;
     };
 
     // Define the function in any client application
