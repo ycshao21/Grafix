@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "Application.h"
 
+#include "Grafix/Renderer/Renderer.h"
+
 namespace Grafix
 {
     Application* Application::s_Instance = nullptr;
@@ -18,10 +20,13 @@ namespace Grafix
         m_Window = Window::Create(windowSpec);
         m_Window->Init();
         m_Window->SetEventCallback([this](Event& e) { OnEvent(e); });
+
+        Renderer::Init();
     }
 
     Application::~Application()
     {
+        Renderer::Shutdown();
     }
 
     void Application::OnEvent(Event& e)
