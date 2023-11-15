@@ -6,7 +6,6 @@
 
 #include <string>
 
-// NOTE: "#include <GLFW/glfw3.h>" will cause compile error, so we declare "struct GLFWwindow" here.
 struct GLFWwindow;
 
 namespace Grafix
@@ -48,8 +47,6 @@ namespace Grafix
 
         static Unique<Window> Create(const WindowSpecification& spec);
     private:
-        WindowSpecification m_Spec;
-
         struct WindowData
         {
             std::string Title;
