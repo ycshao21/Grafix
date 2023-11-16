@@ -6,6 +6,9 @@
 #include "VulkanPhysicalDevice.h"
 #include "VulkanLogicalDevice.h"
 
+// Put swapchain here?
+#include "VulkanSwapchain.h"
+
 struct GLFWwindow;
 
 namespace Grafix
@@ -20,6 +23,8 @@ namespace Grafix
         virtual void SwapBuffers() override;
 
         static VkInstance GetInstance() { return s_Instance; }
+        Shared<VulkanLogicalDevice> GetLogicalDevice() const { return m_LogicalDevice; }
+        Shared<VulkanSwapchain> GetSwapchain() const { return m_Swapchain; }
     private:
         void CreateInstance();
         void SetupDebugMessenger();
@@ -33,5 +38,8 @@ namespace Grafix
         // Devices
         Shared<VulkanPhysicalDevice> m_PhysicalDevice = nullptr;
         Shared<VulkanLogicalDevice> m_LogicalDevice = nullptr;
+
+        // Swapchain
+        Shared<VulkanSwapchain> m_Swapchain = nullptr;
     };
 }

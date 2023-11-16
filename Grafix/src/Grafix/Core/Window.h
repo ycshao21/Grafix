@@ -62,5 +62,7 @@ namespace Grafix
 
         GLFWwindow* m_Window = nullptr;
         Shared<RendererContext> m_Context = nullptr;
+
+        friend class VulkanContext;
     };
 }

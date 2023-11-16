@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "VertexBuffer.h"
-
 #include "Platform/OpenGL/OpenGLVertexBuffer.h"
+#include "Platform/Vulkan/VulkanVertexBuffer.h"
 
 #include "RendererAPI.h"
 
@@ -13,7 +13,7 @@ namespace Grafix
         {
             case RendererAPIType::None:    return nullptr;
             case RendererAPIType::OpenGL:  return CreateShared<OpenGLVertexBuffer>(vertices, bytes);
-            ////case RendererAPIType::Vulkan:  return nullptr;
+            case RendererAPIType::Vulkan:  return CreateShared<VulkanVertexBuffer>(vertices, bytes);
         }
         return nullptr;
     }

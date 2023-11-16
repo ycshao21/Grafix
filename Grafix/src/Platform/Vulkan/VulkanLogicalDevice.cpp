@@ -16,7 +16,7 @@ namespace Grafix
         deviceCI.ppEnabledExtensionNames = extensions.data();
         deviceCI.queueCreateInfoCount = (uint32_t)m_PhysicalDevice->GetQueueCreateInfos().size();
         deviceCI.pQueueCreateInfos = m_PhysicalDevice->GetQueueCreateInfos().data();
-        VK_CHECK(vkCreateDevice(m_PhysicalDevice->GetPhysicalDevice(), &deviceCI, nullptr, &m_LogicalDevice));
+        VK_CHECK(vkCreateDevice(m_PhysicalDevice->GetVkPhysicalDevice(), &deviceCI, nullptr, &m_LogicalDevice));
 
         vkGetDeviceQueue(m_LogicalDevice, m_PhysicalDevice->GetQueueFamilyIndices().GraphicsFamily, 0, &m_GraphicsQueue);
         vkGetDeviceQueue(m_LogicalDevice, m_PhysicalDevice->GetQueueFamilyIndices().ComputeFamily, 0, &m_ComputeQueue);

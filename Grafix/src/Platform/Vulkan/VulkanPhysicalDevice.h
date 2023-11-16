@@ -17,7 +17,7 @@ namespace Grafix
         VulkanPhysicalDevice();
         ~VulkanPhysicalDevice();
 
-        VkPhysicalDevice GetPhysicalDevice() const { return m_PhysicalDevice; }
+        VkPhysicalDevice GetVkPhysicalDevice() const { return m_PhysicalDevice; }
 
         bool IsExtensionSupported(const std::string& extensionName) const;
 

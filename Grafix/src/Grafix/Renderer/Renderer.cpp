@@ -3,6 +3,7 @@
 
 #include "RendererAPI.h"
 #include "Platform/OpenGL/OpenGLRenderer.h"
+#include "Platform/Vulkan/VulkanRenderer.h"
 
 namespace Grafix
 {
@@ -28,6 +29,7 @@ namespace Grafix
             case RendererAPIType::Vulkan:
             {
                 GF_CORE_INFO("Renderer API: Vulkan");
+                s_RendererAPI = new VulkanRenderer();
                 break;
             }
         }

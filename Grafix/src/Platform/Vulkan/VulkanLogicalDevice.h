@@ -13,7 +13,8 @@ namespace Grafix
 
         void Destroy();
 
-        VkDevice GetLogicalDevice() const { return m_LogicalDevice; }
+        VkDevice GetVkDevice() const { return m_LogicalDevice; }
+        Shared<VulkanPhysicalDevice> GetPhysicalDevice() const { return m_PhysicalDevice; }
 
         static Shared<VulkanLogicalDevice> Create(const Shared<VulkanPhysicalDevice>& physicalDevice, VkPhysicalDeviceFeatures enabledFeatures);
     private:

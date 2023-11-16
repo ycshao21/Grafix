@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "VulkanContext.h"
 
+#include "Grafix/Core/Application.h"
 #include <GLFW/glfw3.h>
 
 namespace Grafix
@@ -96,12 +97,12 @@ namespace Grafix
 
     VulkanContext::~VulkanContext()
     {
+        m_Swapchain->Destroy();
+
         m_LogicalDevice->Destroy();
 
-        auto vkDestroyDebugUtilsMessengerEXT =
-            (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(s_Instance, "vkDestroyDebugUtilsMessengerEXT");
+        auto vkDestroyDebugUtilsMessengerEXT = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(s_Instance, "vkDestroyDebugUtilsMessengerEXT");
         GF_CORE_ASSERT(vkDestroyDebugUtilsMessengerEXT, "Could not load vkDestroyDebugUtilsMessengerEXT");
-
         vkDestroyDebugUtilsMessengerEXT(s_Instance, m_DebugMessenger, nullptr);
 
         vkDestroyInstance(s_Instance, nullptr);
@@ -116,15 +117,21 @@ namespace Grafix
         
         m_PhysicalDevice = VulkanPhysicalDevice::Pick();
 
-        VkPhysicalDeviceFeatures features{};
         // No features for now.
         // If features are needed, add them here.
-
+        VkPhysicalDeviceFeatures features{};
         m_LogicalDevice = VulkanLogicalDevice::Create(m_PhysicalDevice, features);
+
+        m_Swapchain = CreateShared<VulkanSwapchain>(m_LogicalDevice);
+        m_Swapchain->InitSurface(m_WindowHandle);
+
+        auto& windowData = Application::Get().GetWindow().m_Data;
+        m_Swapchain->Create(&windowData.Width, &windowData.Height, windowData.VSync);
     }
 
     void VulkanContext::SwapBuffers()
     {
+        m_Swapchain->Present();
     }
 
     void VulkanContext::CreateInstance()
