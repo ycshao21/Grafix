@@ -115,7 +115,8 @@ project "Sandbox"
         "Grafix/vendor/spdlog/include",
         "%{IncludeDir.glfw}",
         "%{IncludeDir.Vulkan}",
-        "%{IncludeDir.Glad}"
+        "%{IncludeDir.Glad}",
+        "%{IncludeDir.glm}"
     }
 
     links { "Grafix" }

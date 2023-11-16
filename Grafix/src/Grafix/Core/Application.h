@@ -45,16 +45,6 @@ namespace Grafix
 
         float m_LastFrameTime = 0.0f;
         static Application* s_Instance;
-
-        // TEMP
-        Shared<Shader> m_Shader = nullptr;
-        Shared<Shader> m_SquareShader = nullptr;
-
-        Shared<VertexArray> m_TriVertexArray = nullptr;
-        Shared<VertexBuffer> m_VertexBuffer = nullptr;
-        Shared<IndexBuffer> m_IndexBuffer = nullptr;
-
-        Shared<VertexArray> m_SquareVA= nullptr;
     };
 
     // Define the function in any client application
