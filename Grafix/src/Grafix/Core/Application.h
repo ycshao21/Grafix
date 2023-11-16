@@ -5,7 +5,10 @@
 
 #include "Events/ApplicationEvent.h"
 
+// TEMP
 #include "Grafix/Renderer/Shader.h"
+#include "Grafix/Renderer/VertexBuffer.h"
+#include "Grafix/Renderer/IndexBuffer.h"
 
 namespace Grafix
 {
@@ -43,9 +46,11 @@ namespace Grafix
         static Application* s_Instance;
 
         // TEMP
-        uint32_t m_VertexArray, m_VertexBuffer, m_IndexBuffer;
+        uint32_t m_VertexArray;
 
         Unique<Shader> m_Shader = nullptr;
+        Unique<VertexBuffer> m_VertexBuffer = nullptr;
+        Unique<IndexBuffer> m_IndexBuffer = nullptr;
     };
 
     // Define the function in any client application
