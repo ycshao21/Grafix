@@ -11,9 +11,9 @@ namespace Grafix
     {
         switch (RendererAPI::GetType())
         {
-            case RendererAPIType::None:   { GF_CORE_ERROR("RendererAPI has not been set!"); break; }
-            case RendererAPIType::OpenGL: { GF_CORE_INFO("RendererAPI: OpenGL");            break; }
-            case RendererAPIType::Vulkan: { GF_CORE_INFO("RendererAPI: Vulkan");            break; }
+            case RendererAPIType::None:   { GF_CORE_ASSERT(false, "RendererAPI has not been selected!"); break; }
+            case RendererAPIType::OpenGL: { GF_CORE_INFO("RendererAPI: OpenGL");                         break; }
+            case RendererAPIType::Vulkan: { GF_CORE_INFO("RendererAPI: Vulkan");                         break; }
         }
         
         ////s_RendererAPI->Init();

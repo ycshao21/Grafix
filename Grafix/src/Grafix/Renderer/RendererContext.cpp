@@ -4,7 +4,7 @@
 #include "Platform/OpenGL/OpenGLContext.h"
 #include "Platform/Vulkan/VulkanContext.h"
 
-#include "Grafix/Renderer/RendererAPI.h"
+#include "RendererAPI.h"
 
 namespace Grafix
 {

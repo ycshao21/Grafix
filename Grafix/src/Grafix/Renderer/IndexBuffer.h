@@ -12,7 +12,7 @@ namespace Grafix
 
         virtual inline uint32_t GetCount() const = 0;
 
-        static Unique<IndexBuffer> Create(uint32_t* indices, uint32_t count);
+        static Shared<IndexBuffer> Create(uint32_t* indices, uint32_t count);
     };
 }
 

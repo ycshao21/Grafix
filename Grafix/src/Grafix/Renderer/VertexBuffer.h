@@ -80,8 +80,8 @@ namespace Grafix
 
         inline size_t Size() const { return m_Elements.size(); }
 
-        std::vector<VertexBufferElement>::iterator begin() { return m_Elements.begin(); }
-        std::vector<VertexBufferElement>::iterator end() { return m_Elements.end(); }
+        std::vector<VertexBufferElement>::const_iterator begin() const { return m_Elements.begin(); }
+        std::vector<VertexBufferElement>::const_iterator end() const { return m_Elements.end(); }
 
         VertexBufferElement& operator[](size_t index) { return m_Elements[index]; }
         const VertexBufferElement& operator[](size_t index) const { return m_Elements[index]; }
@@ -103,7 +103,6 @@ namespace Grafix
         virtual const VertexBufferLayout& GetLayout() const = 0;
         virtual void SetLayout(const VertexBufferLayout& layout) = 0;
 
-        static Unique<VertexBuffer> Create(float* vertices, uint32_t bytes);
+        static Shared<VertexBuffer> Create(float* vertices, uint32_t bytes);
     };
-
 }

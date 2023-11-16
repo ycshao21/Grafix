@@ -7,6 +7,7 @@
 
 // TEMP
 #include "Grafix/Renderer/Shader.h"
+#include "Grafix/Renderer/VertexArray.h"
 #include "Grafix/Renderer/VertexBuffer.h"
 #include "Grafix/Renderer/IndexBuffer.h"
 
@@ -46,11 +47,14 @@ namespace Grafix
         static Application* s_Instance;
 
         // TEMP
-        uint32_t m_VertexArray;
+        Shared<Shader> m_Shader = nullptr;
+        Shared<Shader> m_SquareShader = nullptr;
 
-        Unique<Shader> m_Shader = nullptr;
-        Unique<VertexBuffer> m_VertexBuffer = nullptr;
-        Unique<IndexBuffer> m_IndexBuffer = nullptr;
+        Shared<VertexArray> m_TriVertexArray = nullptr;
+        Shared<VertexBuffer> m_VertexBuffer = nullptr;
+        Shared<IndexBuffer> m_IndexBuffer = nullptr;
+
+        Shared<VertexArray> m_SquareVA= nullptr;
     };
 
     // Define the function in any client application

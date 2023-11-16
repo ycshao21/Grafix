@@ -3,16 +3,16 @@
 
 #include "Platform/OpenGL/OpenGLVertexBuffer.h"
 
-#include "Grafix/Renderer/RendererAPI.h"
+#include "RendererAPI.h"
 
 namespace Grafix
 {
-    Unique<VertexBuffer> VertexBuffer::Create(float* vertices, uint32_t bytes)
+    Shared<VertexBuffer> VertexBuffer::Create(float* vertices, uint32_t bytes)
     {
         switch (RendererAPI::GetType())
         {
             case RendererAPIType::None:    return nullptr;
-            case RendererAPIType::OpenGL:  return CreateUnique<OpenGLVertexBuffer>(vertices, bytes);
+            case RendererAPIType::OpenGL:  return CreateShared<OpenGLVertexBuffer>(vertices, bytes);
             ////case RendererAPIType::Vulkan:  return nullptr;
         }
         return nullptr;
