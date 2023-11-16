@@ -1,6 +1,9 @@
 #include "TestLayer.h"
 
+#include <glad/glad.h>
+
 TestLayer::TestLayer()
+    : m_Camera(-1.6f, 1.6f, -0.9f, 0.9f)
 {
     {
         m_VertexArray = Grafix::VertexArray::Create();
@@ -11,98 +14,101 @@ TestLayer::TestLayer()
              0.5f, -0.5f, 0.0f, 0.0f,  0.85f, 0.85f, 1.0f,
              0.0f,  0.5f, 0.0f, 0.85f, 0.85f, 0.0f,  1.0f
         };
-        m_VertexBuffer = Grafix::VertexBuffer::Create(vertices, sizeof(vertices));
+        auto vertexBuffer = Grafix::VertexBuffer::Create(vertices, sizeof(vertices));
 
         Grafix::VertexBufferLayout layout = {
             { Grafix::ShaderDataType::Float3, "a_Position" },
             { Grafix::ShaderDataType::Float4, "a_Color" }
         };
-        m_VertexBuffer->SetLayout(layout);
-        m_VertexArray->AddVertexBuffer(m_VertexBuffer);
+        vertexBuffer->SetLayout(layout);
+        m_VertexArray->AddVertexBuffer(vertexBuffer);
 
         // Index Buffer
         uint32_t indices[3] = { 0, 1, 2 };
-        m_IndexBuffer = Grafix::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t));
-        m_VertexArray->SetIndexBuffer(m_IndexBuffer);
+        auto indexBuffer = Grafix::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t));
+        m_VertexArray->SetIndexBuffer(indexBuffer);
 
         // Shader
         std::string vertexSrc = R"(
-            #version 450
+            #version 450 core
 
             layout(location = 0) in vec3 a_Position;
             layout(location = 1) in vec4 a_Color;
 
-            out vec3 v_Position;
+            uniform mat4 u_ViewProjection;
+
             out vec4 v_Color;
 
             void main()
             {
-                v_Position = a_Position;
                 v_Color = a_Color;
-                gl_Position = vec4(a_Position, 1.0);
+                gl_Position = u_ViewProjection * vec4(a_Position, 1.0);
             }
         )";
 
-            std::string fragmentSrc = R"(
-            #version 450
+        std::string fragmentSrc = R"(
+            #version 450 core
 
             layout(location = 0) out vec4 color;
-            in vec3 v_Position;
+
             in vec4 v_Color;
 
             void main()
             {
-                color = vec4(v_Position * 0.5 + 0.5, 1.0);
                 color = v_Color;
             }
         )";
 
-        m_Shader = Grafix::CreateShared<Grafix::Shader>(vertexSrc, fragmentSrc);
+        m_Shader = Grafix::Shader::Create(vertexSrc, fragmentSrc);
     }
 
-    m_SquareVA = Grafix::VertexArray::Create();
+    {
+        m_SquareVA = Grafix::VertexArray::Create();
 
-    // Vertex Buffer
-    float vertices[4 * 3] = {
-         0.7f,  0.7f, 0.0f,
-        -0.7f,  0.7f, 0.0f,
-        -0.7f, -0.7f, 0.0f,
-         0.7f, -0.7f, 0.0f
-    };
-    Grafix::Shared<Grafix::VertexBuffer> squareVB = Grafix::VertexBuffer::Create(vertices, sizeof(vertices));
+        // Vertex Buffer
+        float vertices[4 * 3] = {
+             0.7f,  0.7f, 0.0f,
+            -0.7f,  0.7f, 0.0f,
+            -0.7f, -0.7f, 0.0f,
+             0.7f, -0.7f, 0.0f
+        };
+        auto squareVB = Grafix::VertexBuffer::Create(vertices, sizeof(vertices));
 
-    squareVB->SetLayout({
-        { Grafix::ShaderDataType::Float3, "a_Position" }
-    });
-    m_SquareVA->AddVertexBuffer(squareVB);
+        squareVB->SetLayout({
+            { Grafix::ShaderDataType::Float3, "a_Position" }
+        });
+        m_SquareVA->AddVertexBuffer(squareVB);
 
-    uint32_t indices[6] = { 0, 1, 2, 2, 3, 0 };
-    Grafix::Shared<Grafix::IndexBuffer> squareIB = Grafix::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t));
-    m_SquareVA->SetIndexBuffer(squareIB);
+        uint32_t indices[6] = { 0, 1, 2, 2, 3, 0 };
+        auto squareIB = Grafix::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t));
+        m_SquareVA->SetIndexBuffer(squareIB);
 
-    std::string squareVertexSrc = R"(
-        #version 450
+        std::string squareVertexSrc = R"(
+            #version 450 core
 
-        layout(location = 0) in vec3 a_Position;
+            layout(location = 0) in vec3 a_Position;
 
-        void main()
-        {
-            gl_Position = vec4(a_Position, 1.0);
-        }
-    )";
+            uniform mat4 u_ViewProjection;
 
-    std::string squareFragmentSrc = R"(
-        #version 450
+            void main()
+            {
+                gl_Position = u_ViewProjection * vec4(a_Position, 1.0);
+            }
+        )";
 
-        layout(location = 0) out vec4 color;
+        std::string squareFragmentSrc = R"(
+            #version 450 core
 
-        void main()
-        {
-            color = vec4(0.6, 0.6, 0.6, 1.0);
-        }
-    )";
-    
-    m_SquareShader = Grafix::CreateShared<Grafix::Shader>(squareVertexSrc, squareFragmentSrc);
+            layout(location = 0) out vec4 color;
+
+            void main()
+            {
+                color = vec4(0.4, 0.4, 0.4, 1.0);
+            }
+        )";
+        
+        m_SquareShader = Grafix::Shader::Create(squareVertexSrc, squareFragmentSrc);
+    }
 }
 
 TestLayer::~TestLayer()
@@ -111,13 +117,53 @@ TestLayer::~TestLayer()
 
 void TestLayer::OnUpdate(float ts)
 {
-    Grafix::Renderer::BeginScene();
+    // Camera movement
+    if (Grafix::Input::IsKeyPressed(Grafix::Key::A))
+    {
+        m_CameraPosition.x -= m_CameraMoveSpeed * ts;
+    }
+    else if (Grafix::Input::IsKeyPressed(Grafix::Key::D))
+    {
+        m_CameraPosition.x += m_CameraMoveSpeed * ts;
+    }
 
-    m_SquareShader->Bind();
-    Grafix::Renderer::Submit(m_SquareVA);
+    if (Grafix::Input::IsKeyPressed(Grafix::Key::W))
+    {
+        m_CameraPosition.y += m_CameraMoveSpeed * ts;
+    }
+    else if (Grafix::Input::IsKeyPressed(Grafix::Key::S))
+    {
+        m_CameraPosition.y -= m_CameraMoveSpeed * ts;
+    }
 
-    m_Shader->Bind();
-    Grafix::Renderer::Submit(m_VertexArray);
+    // Camera rotation
+    if (Grafix::Input::IsKeyPressed(Grafix::Key::Left))
+    {
+        m_CameraRotation += m_CameraRotationSpeed * ts;
+    }
+    else if (Grafix::Input::IsKeyPressed(Grafix::Key::Right))
+    {
+        m_CameraRotation -= m_CameraRotationSpeed * ts;
+    }
+
+    // Reset camera
+    if(Grafix::Input::IsKeyPressed(Grafix::Key::R))
+    {
+        m_CameraPosition = glm::vec3(0.0f);
+        m_CameraRotation = 0.0f;
+    }
+
+    m_Camera.SetPosition(m_CameraPosition);
+    m_Camera.SetRotation(m_CameraRotation);
+
+    Grafix::Renderer::BeginScene(m_Camera);
+
+    Grafix::Renderer::Submit(m_SquareShader, m_SquareVA);
+    Grafix::Renderer::Submit(m_Shader, m_VertexArray);
 
     Grafix::Renderer::EndScene();
+}
+
+void TestLayer::OnEvent(Grafix::Event& e)
+{
 }

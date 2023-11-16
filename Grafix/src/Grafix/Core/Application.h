@@ -5,12 +5,6 @@
 
 #include "Events/ApplicationEvent.h"
 
-// TEMP
-#include "Grafix/Renderer/Shader.h"
-#include "Grafix/Renderer/VertexArray.h"
-#include "Grafix/Renderer/VertexBuffer.h"
-#include "Grafix/Renderer/IndexBuffer.h"
-
 namespace Grafix
 {
     struct ApplicationSpecification final

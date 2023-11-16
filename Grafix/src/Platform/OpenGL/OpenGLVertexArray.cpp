@@ -43,10 +43,10 @@ namespace Grafix
 
     void OpenGLVertexArray::AddVertexBuffer(const Shared<VertexBuffer>& vertexBuffer)
     {
+        GF_CORE_ASSERT(vertexBuffer->GetLayout().GetElements().size() > 0, "Vertex buffer has no layout!");
+
         glBindVertexArray(m_RendererID);
         vertexBuffer->Bind();
-
-        GF_CORE_ASSERT(vertexBuffer->GetLayout().GetElements().size() > 0, "Vertex buffer has no layout!");
 
         uint32_t index = 0;
         const auto& layout = vertexBuffer->GetLayout();

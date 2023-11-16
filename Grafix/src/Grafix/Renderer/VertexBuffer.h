@@ -36,14 +36,14 @@ namespace Grafix
     {
         std::string Name;
         ShaderDataType Type;
-        uint32_t Offset;
         uint32_t Size;
+        uint32_t Offset;
         bool Normalized;
 
         VertexBufferElement() = default;
 
         VertexBufferElement(ShaderDataType type, const std::string& name, bool normalized = false)
-            : Name(name), Type(type), Offset(0), Size(ShaderDataTypeSize(type)), Normalized(normalized)
+            : Name(name), Type(type), Size(ShaderDataTypeSize(type)), Offset(0), Normalized(normalized)
         {
         }
 

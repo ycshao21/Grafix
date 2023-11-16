@@ -8,6 +8,8 @@ namespace Grafix
 {
     static RendererAPI* s_RendererAPI = nullptr;
 
+    Renderer::SceneData* Renderer::s_SceneData = nullptr;
+
     void Renderer::Init()
     {
         switch (RendererAPI::GetType())
@@ -31,25 +33,32 @@ namespace Grafix
         }
         
         s_RendererAPI->Init();
+        s_SceneData = new SceneData;
     }
 
     void Renderer::Shutdown()
     {
+        delete s_SceneData;
         s_RendererAPI->Shutdown();
     }
 
-    void Renderer::BeginScene()
+    void Renderer::BeginScene(const OrthographicCamera& camera)
     {
         s_RendererAPI->SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
         s_RendererAPI->Clear();
+
+        s_SceneData->ViewProjectionMatrix = camera.GetViewProjectionMatrix();
     }
 
     void Renderer::EndScene()
     {
     }
 
-    void Renderer::Submit(const Shared<VertexArray>& vertexArray)
+    void Renderer::Submit(const Shared<Shader>& shader, const Shared<VertexArray>& vertexArray)
     {
+        shader->Bind();
+        shader->UploadUniformMat4("u_ViewProjection", s_SceneData->ViewProjectionMatrix);
+
         vertexArray->Bind();
         s_RendererAPI->DrawIndexed(vertexArray);
     }

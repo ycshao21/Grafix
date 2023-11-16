@@ -1,6 +1,8 @@
 #pragma once
 
+#include "OrthographicCamera.h"
 #include "VertexArray.h"
+#include "Shader.h"
 
 namespace Grafix
 {
@@ -10,9 +12,16 @@ namespace Grafix
         static void Init();
         static void Shutdown();
 
-        static void BeginScene();
+        static void BeginScene(const OrthographicCamera& camera);
         static void EndScene();
 
-        static void Submit(const Shared<VertexArray>& vertexArray);
+        static void Submit(const Shared<Shader>& shader, const Shared<VertexArray>& vertexArray);
+    private:
+        struct SceneData
+        {
+            glm::mat4 ViewProjectionMatrix;
+        };
+
+        static SceneData* s_SceneData;
     };
 }
