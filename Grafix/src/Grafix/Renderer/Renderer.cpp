@@ -5,6 +5,8 @@
 #include "Platform/OpenGL/OpenGLRenderer.h"
 #include "Platform/Vulkan/VulkanRenderer.h"
 
+#include "Platform/OpenGL/OpenGLShader.h"
+
 namespace Grafix
 {
     static RendererAPI* s_RendererAPI = nullptr;
@@ -56,10 +58,15 @@ namespace Grafix
     {
     }
 
-    void Renderer::Submit(const Shared<Shader>& shader, const Shared<VertexArray>& vertexArray)
+    void Renderer::Submit(const Shared<Shader>& shader, const Shared<VertexArray>& vertexArray, const glm::mat4& transform)
     {
         shader->Bind();
-        shader->UploadUniformMat4("u_ViewProjection", s_SceneData->ViewProjectionMatrix);
+
+        if (RendererAPI::GetType() == RendererAPIType::OpenGL)
+        {
+            std::dynamic_pointer_cast<OpenGLShader>(shader)->UploadUniformMat4("u_ViewProjection", s_SceneData->ViewProjectionMatrix);
+            std::dynamic_pointer_cast<OpenGLShader>(shader)->UploadUniformMat4("u_Transform", transform);
+        }
 
         vertexArray->Bind();
         s_RendererAPI->DrawIndexed(vertexArray);

@@ -15,7 +15,7 @@ namespace Grafix
         static void BeginScene(const OrthographicCamera& camera);
         static void EndScene();
 
-        static void Submit(const Shared<Shader>& shader, const Shared<VertexArray>& vertexArray);
+        static void Submit(const Shared<Shader>& shader, const Shared<VertexArray>& vertexArray, const glm::mat4& transform = glm::mat4(1.0f));
     private:
         struct SceneData
         {

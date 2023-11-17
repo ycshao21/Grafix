@@ -12,8 +12,11 @@ public:
     virtual void OnEvent(Grafix::Event& e) override;
 private:
     // Shader
+    Grafix::ShaderLibrary m_ShaderLibrary;
+
     Grafix::Shared<Grafix::Shader> m_SquareShader = nullptr;
     Grafix::Shared<Grafix::VertexArray> m_SquareVA= nullptr;
+    glm::vec4 m_SquareColor = glm::vec4(0.3f);
 
     Grafix::Shared<Grafix::Shader> m_Shader = nullptr;
     Grafix::Shared<Grafix::VertexArray> m_VertexArray = nullptr;
@@ -25,5 +28,10 @@ private:
     float m_CameraMoveSpeed = 1.0f;
 
     float m_CameraRotation = 0.0f;
-    float m_CameraRotationSpeed = 35.0f;
+    float m_CameraRotationSpeed = 85.0f;
+
+    glm::vec3 m_TrianglePosition = glm::vec3(0.0f);
+    float m_TriangleMoveSpeed = 0.5f;
+    float m_TriangleRotation = 0.0f;
+    float m_TriangleRotationSpeed = 105.0f;
 };

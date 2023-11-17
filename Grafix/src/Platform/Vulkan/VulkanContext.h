@@ -24,7 +24,7 @@ namespace Grafix
 
         static VkInstance GetInstance() { return s_Instance; }
         Shared<VulkanLogicalDevice> GetLogicalDevice() const { return m_LogicalDevice; }
-        Shared<VulkanSwapchain> GetSwapchain() const { return m_Swapchain; }
+        ////Shared<VulkanSwapchain> GetSwapchain() const { return m_Swapchain; }
     private:
         void CreateInstance();
         void SetupDebugMessenger();
