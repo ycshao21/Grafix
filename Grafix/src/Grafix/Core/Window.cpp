@@ -83,21 +83,19 @@ namespace Grafix
         // ------------------------------------------------------------------------------------------------------------------------------------------
         // Create GLFW Window
         // ------------------------------------------------------------------------------------------------------------------------------------------
+        if (RendererAPI::GetType() == RendererAPIType::Vulkan)
         {
-            if (RendererAPI::GetType() == RendererAPIType::Vulkan)
-            {
-                // [Vulkan] Since we are using Vulkan, we don't need GLFW to create an OpenGL context.
-                glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-
-                // [Vulkan] Window resizing will break the swapchain, so we disable it here.
-                //          When resizing is supported by the swapchain, this can be removed.
-                glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-            }
-
-            // If we need fullscreen, we need to set the 4th parameter to glfwGetPrimaryMonitor()
-            m_Window = glfwCreateWindow(m_Data.Width, m_Data.Height, m_Data.Title.c_str(), nullptr, nullptr);
-            GF_CORE_INFO("Creating window: {0} ({1} ¡Á {2})", m_Data.Title, m_Data.Width, m_Data.Height);
+            GF_CORE_ASSERT(glfwVulkanSupported(), "GLFW does not support Vulkan!");
+            // [Vulkan] Since we are using Vulkan, we don't need GLFW to create an OpenGL context.
+            glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+            // [Vulkan] Window resizing will break the swapchain, so we disable it here.
+            //          When resizing is supported by the swapchain, this can be removed.
+            glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
         }
+
+        // If we need fullscreen, we need to set the 4th parameter to glfwGetPrimaryMonitor()
+        m_Window = glfwCreateWindow(m_Data.Width, m_Data.Height, m_Data.Title.c_str(), nullptr, nullptr);
+        GF_CORE_INFO("Creating window: {0} ({1} ¡Á {2})", m_Data.Title, m_Data.Width, m_Data.Height);
 
         // ------------------------------------------------------------------------------------------------------------------------------------------
         // Initialize Renderer Context

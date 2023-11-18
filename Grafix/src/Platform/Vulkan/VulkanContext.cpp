@@ -12,7 +12,7 @@ namespace Grafix
     static bool s_EnableValidation = false;
 #endif
 
-    static void CheckExtensions(const std::vector<const char*>& extensions)
+    static void CheckExtensionSupport(const std::vector<const char*>& extensions)
     {
         uint32_t supportedExtensionCount = 0;
         vkEnumerateInstanceExtensionProperties(nullptr, &supportedExtensionCount, nullptr);
@@ -43,7 +43,7 @@ namespace Grafix
         }
     }
 
-    static void CheckLayers(const std::vector<const char*>& layers)
+    static void CheckLayersSupport(const std::vector<const char*>& layers)
     {
         uint32_t supportedLayerCount = 0;
         vkEnumerateInstanceLayerProperties(&supportedLayerCount, nullptr);
@@ -73,6 +73,7 @@ namespace Grafix
         }
     }
 
+    // TODO: Improve this
     static VKAPI_ATTR VkBool32 VKAPI_CALL DebugUtilsMessengerCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
                                                         VkDebugUtilsMessageTypeFlagsEXT messageType,
                                                         const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
@@ -90,9 +91,12 @@ namespace Grafix
 
     VkInstance VulkanContext::s_Instance = nullptr;
 
+    static VulkanContext* s_Context = nullptr;
+
     VulkanContext::VulkanContext(GLFWwindow* windowHandle)
         : m_WindowHandle(windowHandle)
     {
+        s_Context = this;
     }
 
     VulkanContext::~VulkanContext()
@@ -101,37 +105,48 @@ namespace Grafix
 
         m_LogicalDevice->Destroy();
 
-        auto vkDestroyDebugUtilsMessengerEXT = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(s_Instance, "vkDestroyDebugUtilsMessengerEXT");
-        GF_CORE_ASSERT(vkDestroyDebugUtilsMessengerEXT, "Could not load vkDestroyDebugUtilsMessengerEXT");
-        vkDestroyDebugUtilsMessengerEXT(s_Instance, m_DebugMessenger, nullptr);
-
+        if (s_EnableValidation)
+        {
+            // Destroy debug messenger
+            auto vkDestroyDebugUtilsMessengerEXT = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(s_Instance, "vkDestroyDebugUtilsMessengerEXT");
+            GF_CORE_ASSERT(vkDestroyDebugUtilsMessengerEXT, "Could not load vkDestroyDebugUtilsMessengerEXT");
+            vkDestroyDebugUtilsMessengerEXT(s_Instance, m_DebugMessenger, nullptr);
+        }
         vkDestroyInstance(s_Instance, nullptr);
+
+        s_Context = nullptr;
     }
 
     void VulkanContext::Init()
     {
-        GF_CORE_ASSERT(glfwVulkanSupported(), "GLFW does not support Vulkan!");
-
         CreateInstance();
-        SetupDebugMessenger();
+
+        if(s_EnableValidation)
+            SetupDebugMessenger();
         
         m_PhysicalDevice = VulkanPhysicalDevice::Pick();
 
+        m_Swapchain = CreateShared<VulkanSwapchain>();
+        m_Swapchain->InitSurface(m_WindowHandle);
+
         // No features for now.
-        // If features are needed, add them here.
         VkPhysicalDeviceFeatures features{};
         m_LogicalDevice = VulkanLogicalDevice::Create(m_PhysicalDevice, features);
 
-        m_Swapchain = CreateShared<VulkanSwapchain>(m_LogicalDevice);
-        m_Swapchain->InitSurface(m_WindowHandle);
+        m_Swapchain->BindLogicalDevice(m_LogicalDevice);
 
         auto& windowData = Application::Get().GetWindow().m_Data;
-        m_Swapchain->Create(&windowData.Width, &windowData.Height, windowData.VSync);
+        m_Swapchain->Create(windowData.Width, windowData.Height);
     }
 
     void VulkanContext::SwapBuffers()
     {
         m_Swapchain->Present();
+    }
+
+    VulkanContext& VulkanContext::Get()
+    {
+        return *s_Context;
     }
 
     void VulkanContext::CreateInstance()
@@ -142,28 +157,28 @@ namespace Grafix
         // Application information
         VkApplicationInfo appInfo{};
         appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+        appInfo.pApplicationName = "Grafix";
+        appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
+        appInfo.pEngineName = "Grafix";
+        appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
         appInfo.apiVersion = VK_API_VERSION_1_3;
         instanceCI.pApplicationInfo = &appInfo;
 
         // Extensions
         uint32_t glfwExtensionCount = 0;
         const char** glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
-
-        std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
+        std::vector<const char*> requiredExtensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
         if (s_EnableValidation)
-            extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
-
-        CheckExtensions(extensions);
-
-        instanceCI.enabledExtensionCount = (uint32_t)extensions.size();
-        instanceCI.ppEnabledExtensionNames = extensions.data();
+            requiredExtensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+        CheckExtensionSupport(requiredExtensions);
+        instanceCI.enabledExtensionCount = (uint32_t)requiredExtensions.size();
+        instanceCI.ppEnabledExtensionNames = requiredExtensions.data();
 
         // Validation layer
         if (s_EnableValidation)
         {
             const char* validationLayer = "VK_LAYER_KHRONOS_validation";
-            CheckLayers({ validationLayer });
-
+            CheckLayersSupport({ validationLayer });
             instanceCI.enabledLayerCount = 1;
             instanceCI.ppEnabledLayerNames = &validationLayer;
         }
@@ -182,10 +197,12 @@ namespace Grafix
                                    | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT
                                    | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
         debugMsgCI.pfnUserCallback = DebugUtilsMessengerCallback;
+        debugMsgCI.pUserData = nullptr;
 
+        // NOTE: vkCreateDebugUtilsMessengerEXT is an extension function, so we need to load it manually.
         auto vkCreateDebugUtilsMessengerEXT = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(s_Instance, "vkCreateDebugUtilsMessengerEXT");
         GF_CORE_ASSERT(vkCreateDebugUtilsMessengerEXT, "Could not load vkCreateDebugUtilsMessengerEXT.");
-        vkCreateDebugUtilsMessengerEXT(s_Instance, &debugMsgCI, nullptr, &m_DebugMessenger);
+        VK_CHECK(vkCreateDebugUtilsMessengerEXT(s_Instance, &debugMsgCI, nullptr, &m_DebugMessenger));
     }
 }
 

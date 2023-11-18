@@ -22,9 +22,11 @@ namespace Grafix
         virtual void Init() override;
         virtual void SwapBuffers() override;
 
+        static VulkanContext& Get();
         static VkInstance GetInstance() { return s_Instance; }
+        Shared<VulkanPhysicalDevice> GetPhysicalDevice() const { return m_PhysicalDevice; }
         Shared<VulkanLogicalDevice> GetLogicalDevice() const { return m_LogicalDevice; }
-        ////Shared<VulkanSwapchain> GetSwapchain() const { return m_Swapchain; }
+        Shared<VulkanSwapchain> GetSwapchain() const { return m_Swapchain; }
     private:
         void CreateInstance();
         void SetupDebugMessenger();

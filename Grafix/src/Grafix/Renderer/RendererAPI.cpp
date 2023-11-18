@@ -3,5 +3,5 @@
 
 namespace Grafix
 {
-    RendererAPIType RendererAPI::s_APIType = RendererAPIType::OpenGL;
+    RendererAPIType RendererAPI::s_APIType = RendererAPIType::Vulkan;
 }
