@@ -23,6 +23,8 @@ namespace Grafix
         void Present() {}
 
         VkSurfaceKHR GetVkSurface() const { return m_Surface; }
+        const VkExtent2D& GetExtent() const { return m_Extent; }
+        const VkSurfaceFormatKHR& GetSurfaceFormat() const { return m_SurfaceFormat; }
     private:
         Shared<VulkanLogicalDevice> m_LogicalDevice = nullptr;
 

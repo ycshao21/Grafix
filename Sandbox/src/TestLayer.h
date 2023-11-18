@@ -2,6 +2,8 @@
 
 #include "Grafix.h"
 
+#include <vulkan/vulkan.h>
+
 class TestLayer : public Grafix::Layer
 {
 public:
@@ -11,15 +13,24 @@ public:
     virtual void OnUpdate(float ts) override;
     virtual void OnEvent(Grafix::Event& e) override;
 private:
-    // Shader
-    Grafix::ShaderLibrary m_ShaderLibrary;
+    ////// Shader
+    ////Grafix::ShaderLibrary m_ShaderLibrary;
 
-    Grafix::Shared<Grafix::Shader> m_SquareShader = nullptr;
-    Grafix::Shared<Grafix::VertexArray> m_SquareVA= nullptr;
-    glm::vec4 m_SquareColor = glm::vec4(0.3f);
+    ////Grafix::Shared<Grafix::Shader> m_SquareShader = nullptr;
+    ////Grafix::Shared<Grafix::VertexArray> m_SquareVA= nullptr;
+    ////glm::vec4 m_SquareColor = glm::vec4(0.3f);
 
-    Grafix::Shared<Grafix::Shader> m_Shader = nullptr;
-    Grafix::Shared<Grafix::VertexArray> m_VertexArray = nullptr;
+    ////Grafix::Shared<Grafix::Shader> m_Shader = nullptr;
+    ////Grafix::Shared<Grafix::VertexArray> m_VertexArray = nullptr;
+
+    VkShaderModule m_VertexShaderModule;
+    VkShaderModule m_FragmentShaderModule;
+
+    VkPipelineLayout m_PipelineLayout;
+
+    VkRenderPass m_RenderPass;
+
+    ///////////////////////////////////////////////////////
 
     // Camara
     Grafix::OrthographicCamera m_Camera;
