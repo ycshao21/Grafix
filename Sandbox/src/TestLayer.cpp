@@ -77,6 +77,117 @@ TestLayer::TestLayer()
     ////    m_ShaderLibrary.LoadShader("assets/shaders/FlatColor.glsl");
     ////    m_SquareShader = m_ShaderLibrary.GetShader("FlatColor");
     ////}
+
+    PipelineSetup();
+}
+
+TestLayer::~TestLayer()
+{
+    auto device = Grafix::VulkanContext::Get().GetLogicalDevice()->GetVkDevice();
+
+    vkDestroyPipeline(device, m_GraphicsPipeline, nullptr);
+
+
+    vkDestroyRenderPass(device, m_RenderPass, nullptr);
+
+    vkDestroyPipelineLayout(device, m_PipelineLayout, nullptr);
+}
+
+void TestLayer::OnUpdate(float ts)
+{
+    // Camera movement
+    glm::mat4 rotate = glm::rotate(glm::mat4(1.0f), glm::radians(m_CameraRotation), glm::vec3(0, 0, 1));
+    if (Grafix::Input::IsKeyPressed(Grafix::Key::A))
+    {
+        m_CameraPosition -= m_CameraMoveSpeed * glm::vec3(rotate[0].x, rotate[0].y, rotate[0].z) * ts;
+    }
+    else if (Grafix::Input::IsKeyPressed(Grafix::Key::D))
+    {
+        m_CameraPosition += m_CameraMoveSpeed * glm::vec3(rotate[0].x, rotate[0].y, rotate[0].z) * ts;
+    }
+
+    if (Grafix::Input::IsKeyPressed(Grafix::Key::W))
+    {
+        m_CameraPosition += m_CameraMoveSpeed * glm::vec3(rotate[1].x, rotate[1].y, rotate[1].z) * ts;
+    }
+    else if (Grafix::Input::IsKeyPressed(Grafix::Key::S))
+    {
+        m_CameraPosition -= m_CameraMoveSpeed * glm::vec3(rotate[1].x, rotate[1].y, rotate[1].z) * ts;
+    }
+
+    // Camera rotation
+    if (Grafix::Input::IsKeyPressed(Grafix::Key::Left))
+    {
+        m_CameraRotation += m_CameraRotationSpeed * ts;
+    }
+    else if (Grafix::Input::IsKeyPressed(Grafix::Key::Right))
+    {
+        m_CameraRotation -= m_CameraRotationSpeed * ts;
+    }
+
+    // Triangle movement
+    if (Grafix::Input::IsKeyPressed(Grafix::Key::J))
+    {
+        m_TrianglePosition.x -= m_TriangleMoveSpeed * ts;
+    }
+    else if (Grafix::Input::IsKeyPressed(Grafix::Key::L))
+    {
+        m_TrianglePosition.x += m_TriangleMoveSpeed * ts;
+    }
+
+    if (Grafix::Input::IsKeyPressed(Grafix::Key::I))
+    {
+        m_TrianglePosition.y += m_TriangleMoveSpeed * ts;
+    }
+    else if (Grafix::Input::IsKeyPressed(Grafix::Key::K))
+    {
+        m_TrianglePosition.y -= m_TriangleMoveSpeed * ts;
+    }
+
+    m_TriangleRotation += m_TriangleRotationSpeed * ts;
+
+
+    // Reset camera
+    if(Grafix::Input::IsKeyPressed(Grafix::Key::R))
+    {
+        m_CameraPosition = glm::vec3(0.0f);
+        m_CameraRotation = 0.0f;
+    }
+
+    m_Camera.SetPosition(m_CameraPosition);
+    m_Camera.SetRotation(m_CameraRotation);
+
+    ////Grafix::Renderer::BeginScene(m_Camera);
+
+    ////std::dynamic_pointer_cast<Grafix::OpenGLShader>(m_SquareShader)->Bind();
+    ////std::dynamic_pointer_cast<Grafix::OpenGLShader>(m_SquareShader)->UploadUniformFloat4("u_Color", m_SquareColor);
+
+    ////{
+    ////    glm::mat4 transform = glm::translate(glm::mat4(1.0f), m_TrianglePosition) 
+    ////        * glm::rotate(glm::mat4(1.0f), glm::radians(m_TriangleRotation), glm::vec3(0.0f, 0.0f, 1.0f))
+    ////        * glm::scale(glm::mat4(1.0f), glm::vec3(0.5f));
+    ////    Grafix::Renderer::Submit(m_Shader, m_VertexArray, transform);
+    ////}
+
+    ////for (int y = 0; y < 15; ++y)
+    ////{
+    ////    for (int x = 0; x < 15; ++x)
+    ////    {
+    ////        glm::vec3 position = glm::vec3(x * 0.11f, y * 0.11f, 0.0f);
+    ////        glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) * glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
+    ////        Grafix::Renderer::Submit(m_SquareShader, m_SquareVA, transform);
+    ////    }
+    ////}
+
+    ////Grafix::Renderer::EndScene();
+}
+
+void TestLayer::OnEvent(Grafix::Event& e)
+{
+}
+
+void TestLayer::PipelineSetup()
+{
     auto device = Grafix::VulkanContext::Get().GetLogicalDevice()->GetVkDevice();
     auto swapchain = Grafix::VulkanContext::Get().GetSwapchain();
 
@@ -90,36 +201,40 @@ TestLayer::TestLayer()
     std::string vertexSrc = ReadFile(vertexFilePath);
     std::string fragmentSrc = ReadFile(fragmentFilePath);
 
+    // These are for pipeline creation
+    VkShaderModule vertexShaderModule;
+    VkShaderModule fragmentShaderModule;
+
     // Vertex shader
     VkShaderModuleCreateInfo vertShaderCI{};
     vertShaderCI.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
     vertShaderCI.codeSize = vertexSrc.size();
     vertShaderCI.pCode = (uint32_t*)vertexSrc.data();
-    VK_CHECK(vkCreateShaderModule(device, &vertShaderCI, nullptr, &m_VertexShaderModule));
+    VK_CHECK(vkCreateShaderModule(device, &vertShaderCI, nullptr, &vertexShaderModule));
 
     // Fragment shader
     VkShaderModuleCreateInfo fragShaderCI{};
     fragShaderCI.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
     fragShaderCI.codeSize = fragmentSrc.size();
     fragShaderCI.pCode = (uint32_t*)fragmentSrc.data();
-    VK_CHECK(vkCreateShaderModule(device, &fragShaderCI, nullptr, &m_FragmentShaderModule));
+    VK_CHECK(vkCreateShaderModule(device, &fragShaderCI, nullptr, &fragmentShaderModule));
 
     VkPipelineShaderStageCreateInfo vertStageCI{};
     vertStageCI.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
     vertStageCI.stage = VK_SHADER_STAGE_VERTEX_BIT;
-    vertStageCI.module = m_VertexShaderModule;
+    vertStageCI.module = vertexShaderModule;
     vertStageCI.pName = "main";
 
     VkPipelineShaderStageCreateInfo fragStageCI{};
     fragStageCI.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
     fragStageCI.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-    fragStageCI.module = m_FragmentShaderModule;
+    fragStageCI.module = fragmentShaderModule;
     fragStageCI.pName = "main";
 
-    VkPipelineShaderStageCreateInfo shaderStages[] = { vertStageCI, fragStageCI };
+    std::vector<VkPipelineShaderStageCreateInfo> shaderStages = { vertStageCI, fragStageCI };
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // Pipeline
+    // Pipeline (requires device & swapchain)
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // Dynamic states
@@ -229,9 +344,8 @@ TestLayer::TestLayer()
     pipelineLayoutCI.pPushConstantRanges = nullptr;
     VK_CHECK(vkCreatePipelineLayout(device, &pipelineLayoutCI, nullptr, &m_PipelineLayout));
 
-
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // Render pass
+    // Render pass (requires device)
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     VkAttachmentDescription colorAttachment{};
@@ -263,108 +377,42 @@ TestLayer::TestLayer()
     renderPassCI.pSubpasses = &subpass;
 
     VK_CHECK(vkCreateRenderPass(device, &renderPassCI, nullptr, &m_RenderPass));
-}
-
-TestLayer::~TestLayer()
-{
-    auto device = Grafix::VulkanContext::Get().GetLogicalDevice()->GetVkDevice();
-
-    vkDestroyRenderPass(device, m_RenderPass, nullptr);
-    vkDestroyPipelineLayout(device, m_PipelineLayout, nullptr);
-
-    vkDestroyShaderModule(device, m_VertexShaderModule, nullptr);
-    vkDestroyShaderModule(device, m_FragmentShaderModule, nullptr);
-}
-
-void TestLayer::OnUpdate(float ts)
-{
-    // Camera movement
-    glm::mat4 rotate = glm::rotate(glm::mat4(1.0f), glm::radians(m_CameraRotation), glm::vec3(0, 0, 1));
-    if (Grafix::Input::IsKeyPressed(Grafix::Key::A))
-    {
-        m_CameraPosition -= m_CameraMoveSpeed * glm::vec3(rotate[0].x, rotate[0].y, rotate[0].z) * ts;
-    }
-    else if (Grafix::Input::IsKeyPressed(Grafix::Key::D))
-    {
-        m_CameraPosition += m_CameraMoveSpeed * glm::vec3(rotate[0].x, rotate[0].y, rotate[0].z) * ts;
-    }
-
-    if (Grafix::Input::IsKeyPressed(Grafix::Key::W))
-    {
-        m_CameraPosition += m_CameraMoveSpeed * glm::vec3(rotate[1].x, rotate[1].y, rotate[1].z) * ts;
-    }
-    else if (Grafix::Input::IsKeyPressed(Grafix::Key::S))
-    {
-        m_CameraPosition -= m_CameraMoveSpeed * glm::vec3(rotate[1].x, rotate[1].y, rotate[1].z) * ts;
-    }
-
-    // Camera rotation
-    if (Grafix::Input::IsKeyPressed(Grafix::Key::Left))
-    {
-        m_CameraRotation += m_CameraRotationSpeed * ts;
-    }
-    else if (Grafix::Input::IsKeyPressed(Grafix::Key::Right))
-    {
-        m_CameraRotation -= m_CameraRotationSpeed * ts;
-    }
-
-    // Triangle movement
-    if (Grafix::Input::IsKeyPressed(Grafix::Key::J))
-    {
-        m_TrianglePosition.x -= m_TriangleMoveSpeed * ts;
-    }
-    else if (Grafix::Input::IsKeyPressed(Grafix::Key::L))
-    {
-        m_TrianglePosition.x += m_TriangleMoveSpeed * ts;
-    }
-
-    if (Grafix::Input::IsKeyPressed(Grafix::Key::I))
-    {
-        m_TrianglePosition.y += m_TriangleMoveSpeed * ts;
-    }
-    else if (Grafix::Input::IsKeyPressed(Grafix::Key::K))
-    {
-        m_TrianglePosition.y -= m_TriangleMoveSpeed * ts;
-    }
-
-    m_TriangleRotation += m_TriangleRotationSpeed * ts;
 
 
-    // Reset camera
-    if(Grafix::Input::IsKeyPressed(Grafix::Key::R))
-    {
-        m_CameraPosition = glm::vec3(0.0f);
-        m_CameraRotation = 0.0f;
-    }
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Creation of pipeline (requires shader, render pass, and pipeline layout)
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    m_Camera.SetPosition(m_CameraPosition);
-    m_Camera.SetRotation(m_CameraRotation);
+    VkGraphicsPipelineCreateInfo pipelineCI{};
+    pipelineCI.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
 
-    ////Grafix::Renderer::BeginScene(m_Camera);
+    // Shader stages
+    pipelineCI.stageCount = (uint32_t)shaderStages.size();
+    pipelineCI.pStages = shaderStages.data();
+    pipelineCI.pVertexInputState = &vertexInputCI;
+    pipelineCI.pInputAssemblyState = &inputAssemblyCI;
+    pipelineCI.pViewportState = &viewportCI;
+    pipelineCI.pRasterizationState = &rasterizerCI;
+    pipelineCI.pMultisampleState = &multisampleCI;
+    pipelineCI.pDepthStencilState = nullptr;
+    pipelineCI.pColorBlendState = &colorBlendCI;
+    pipelineCI.pDynamicState = &dynamicStateCI;
 
-    ////std::dynamic_pointer_cast<Grafix::OpenGLShader>(m_SquareShader)->Bind();
-    ////std::dynamic_pointer_cast<Grafix::OpenGLShader>(m_SquareShader)->UploadUniformFloat4("u_Color", m_SquareColor);
+    // Pipeline layout
+    pipelineCI.layout = m_PipelineLayout;
 
-    ////{
-    ////    glm::mat4 transform = glm::translate(glm::mat4(1.0f), m_TrianglePosition) 
-    ////        * glm::rotate(glm::mat4(1.0f), glm::radians(m_TriangleRotation), glm::vec3(0.0f, 0.0f, 1.0f))
-    ////        * glm::scale(glm::mat4(1.0f), glm::vec3(0.5f));
-    ////    Grafix::Renderer::Submit(m_Shader, m_VertexArray, transform);
-    ////}
+    // Render pass
+    pipelineCI.renderPass = m_RenderPass;
+    pipelineCI.subpass = 0;
 
-    ////for (int y = 0; y < 15; ++y)
-    ////{
-    ////    for (int x = 0; x < 15; ++x)
-    ////    {
-    ////        glm::vec3 position = glm::vec3(x * 0.11f, y * 0.11f, 0.0f);
-    ////        glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) * glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
-    ////        Grafix::Renderer::Submit(m_SquareShader, m_SquareVA, transform);
-    ////    }
-    ////}
+    pipelineCI.basePipelineHandle = VK_NULL_HANDLE;
+    pipelineCI.basePipelineIndex = -1;
 
-    ////Grafix::Renderer::EndScene();
-}
+    // 2nd param: Pipeline cache -- store and reuse data to accelerate pipeline creation later
+    VK_CHECK(vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineCI, nullptr, &m_GraphicsPipeline));
 
-void TestLayer::OnEvent(Grafix::Event& e)
-{
+    // When the pipeline is created, the shader modules can be destroyed.
+    vkDestroyShaderModule(device, vertexShaderModule, nullptr);
+    vkDestroyShaderModule(device, fragmentShaderModule, nullptr);
+
 }
