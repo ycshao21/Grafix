@@ -5,7 +5,7 @@
 
 namespace Grafix
 {
-    VulkanLogicalDevice::VulkanLogicalDevice(const Shared<VulkanPhysicalDevice>& physicalDevice, VkPhysicalDeviceFeatures enabledFeatures)
+    VulkanLogicalDevice::VulkanLogicalDevice(const Shared<VulkanPhysicalDevice>& physicalDevice, const VkPhysicalDeviceFeatures& enabledFeatures)
         : m_PhysicalDevice(physicalDevice)
     {
         GF_CORE_ASSERT(m_PhysicalDevice->IsExtensionSupported(VK_KHR_SWAPCHAIN_EXTENSION_NAME), "Swapchain extension is not supported!");
@@ -21,7 +21,7 @@ namespace Grafix
         float queuePriority = 1.0f;
 
         std::vector<VkDeviceQueueCreateInfo> queueCIs;
-        for (auto& queueFamilyIndex : uniqueQueueFamilies)
+        for (auto queueFamilyIndex : uniqueQueueFamilies)
         {
             VkDeviceQueueCreateInfo queueCI{};
             queueCI.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
@@ -34,14 +34,15 @@ namespace Grafix
         VkDeviceCreateInfo deviceCI{};
         deviceCI.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
         deviceCI.pEnabledFeatures = &enabledFeatures;
-        deviceCI.pQueueCreateInfos = queueCIs.data();
         deviceCI.queueCreateInfoCount = (uint32_t)queueCIs.size();
+        deviceCI.pQueueCreateInfos = queueCIs.data();
         deviceCI.enabledExtensionCount = (uint32_t)extensions.size();
         deviceCI.ppEnabledExtensionNames = extensions.data();
         VK_CHECK(vkCreateDevice(m_PhysicalDevice->GetVkPhysicalDevice(), &deviceCI, nullptr, &m_LogicalDevice));
 
-        vkGetDeviceQueue(m_LogicalDevice, queueFamilyIndices.GraphicsFamily, 0, &m_GraphicsQueue);
-        vkGetDeviceQueue(m_LogicalDevice, queueFamilyIndices.PresentFamily, 0, &m_PresentQueue);
+        uint32_t queueIndex = 0;
+        vkGetDeviceQueue(m_LogicalDevice, queueFamilyIndices.GraphicsFamily, queueIndex, &m_GraphicsQueue);
+        vkGetDeviceQueue(m_LogicalDevice, queueFamilyIndices.PresentFamily, queueIndex, &m_PresentQueue);
     }
 
     VulkanLogicalDevice::~VulkanLogicalDevice()
@@ -55,7 +56,7 @@ namespace Grafix
         vkDestroyDevice(m_LogicalDevice, nullptr);
     }
 
-    Shared<VulkanLogicalDevice> VulkanLogicalDevice::Create(const Shared<VulkanPhysicalDevice>& physicalDevice, VkPhysicalDeviceFeatures enabledFeatures)
+    Shared<VulkanLogicalDevice> VulkanLogicalDevice::Create(const Shared<VulkanPhysicalDevice>& physicalDevice, const VkPhysicalDeviceFeatures& enabledFeatures)
     {
         return CreateShared<VulkanLogicalDevice>(physicalDevice, enabledFeatures);
     }

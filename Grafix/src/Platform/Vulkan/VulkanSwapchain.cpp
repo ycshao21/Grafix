@@ -123,7 +123,7 @@ namespace Grafix
         {
             swapchainExtent = surfaceCapabilities.currentExtent;
         }
-        m_Extent = swapchainExtent;
+        m_Extent = std::move(swapchainExtent);
 
         // Image count
         uint32_t imageCount = surfaceCapabilities.minImageCount + 1;
@@ -140,7 +140,7 @@ namespace Grafix
         swapchainCI.minImageCount = imageCount;
         swapchainCI.imageFormat = m_SurfaceFormat.format;
         swapchainCI.imageColorSpace = m_SurfaceFormat.colorSpace;
-        swapchainCI.imageExtent = swapchainExtent;
+        swapchainCI.imageExtent = m_Extent;
         swapchainCI.imageArrayLayers = 1;
         swapchainCI.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
@@ -210,7 +210,7 @@ namespace Grafix
     {
         auto device = m_LogicalDevice->GetVkDevice();
 
-        for(auto& imageView : m_SwapchainImageViews)
+        for(auto imageView : m_SwapchainImageViews)
             vkDestroyImageView(device, imageView, nullptr);
 
         vkDestroySwapchainKHR(device, m_Swapchain, nullptr);

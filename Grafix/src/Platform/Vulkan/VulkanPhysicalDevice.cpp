@@ -20,6 +20,8 @@ namespace Grafix
         // Pick the first suitable device.
         VkPhysicalDeviceProperties properties;
         VkPhysicalDeviceFeatures features;
+
+        m_PhysicalDevice = physicalDevices[0];
         for (auto physicalDevice : physicalDevices)
         {
             vkGetPhysicalDeviceProperties(physicalDevice, &properties);

@@ -22,9 +22,15 @@ namespace Grafix
 
         void Present() {}
 
+        const std::vector<VkImageView>& GetImageViews() { return m_SwapchainImageViews; }
+
         VkSurfaceKHR GetVkSurface() const { return m_Surface; }
         const VkExtent2D& GetExtent() const { return m_Extent; }
         const VkSurfaceFormatKHR& GetSurfaceFormat() const { return m_SurfaceFormat; }
+
+        VkSwapchainKHR GetVkSwapchain() const { return m_Swapchain; }
+
+        uint32_t GetGraphicsQueueFamilyIndex() const { return (uint32_t)m_GraphicsQueueFamilyIndex; }
     private:
         Shared<VulkanLogicalDevice> m_LogicalDevice = nullptr;
 

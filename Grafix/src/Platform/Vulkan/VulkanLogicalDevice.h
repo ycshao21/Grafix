@@ -14,7 +14,7 @@ namespace Grafix
     class VulkanLogicalDevice
     {
     public:
-        VulkanLogicalDevice(const Shared<VulkanPhysicalDevice>& physicalDevice, VkPhysicalDeviceFeatures enabledFeatures);
+        VulkanLogicalDevice(const Shared<VulkanPhysicalDevice>& physicalDevice, const VkPhysicalDeviceFeatures& enabledFeatures);
         ~VulkanLogicalDevice();
 
         void Destroy();
@@ -22,7 +22,10 @@ namespace Grafix
         VkDevice GetVkDevice() const { return m_LogicalDevice; }
         Shared<VulkanPhysicalDevice> GetPhysicalDevice() const { return m_PhysicalDevice; }
 
-        static Shared<VulkanLogicalDevice> Create(const Shared<VulkanPhysicalDevice>& physicalDevice, VkPhysicalDeviceFeatures enabledFeatures);
+        VkQueue GetGraphicsQueue() const { return m_GraphicsQueue; }
+        VkQueue GetPresentQueue() const { return m_PresentQueue; }
+
+        static Shared<VulkanLogicalDevice> Create(const Shared<VulkanPhysicalDevice>& physicalDevice, const VkPhysicalDeviceFeatures& enabledFeatures);
     private:
         // TODO: Remove this, this is already done in VulkanSwapchain::InitSurface();
         QueueFamilyIndices FindQueueFamilyIndices() const;
