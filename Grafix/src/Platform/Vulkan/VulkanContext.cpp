@@ -101,20 +101,6 @@ namespace Grafix
 
     VulkanContext::~VulkanContext()
     {
-        m_Swapchain->Destroy();
-
-        m_LogicalDevice->Destroy();
-
-        if (s_EnableValidation)
-        {
-            // Destroy debug messenger
-            auto vkDestroyDebugUtilsMessengerEXT = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(s_Instance, "vkDestroyDebugUtilsMessengerEXT");
-            GF_CORE_ASSERT(vkDestroyDebugUtilsMessengerEXT, "Could not load vkDestroyDebugUtilsMessengerEXT");
-            vkDestroyDebugUtilsMessengerEXT(s_Instance, m_DebugMessenger, nullptr);
-        }
-        vkDestroyInstance(s_Instance, nullptr);
-
-        s_Context = nullptr;
     }
 
     void VulkanContext::Init()
@@ -142,6 +128,23 @@ namespace Grafix
     void VulkanContext::SwapBuffers()
     {
         m_Swapchain->Present();
+    }
+
+    void VulkanContext::Destroy()
+    {
+        m_Swapchain->Destroy();
+
+        m_LogicalDevice->Destroy();
+
+        if (s_EnableValidation)
+        {
+            // Destroy debug messenger
+            auto vkDestroyDebugUtilsMessengerEXT = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(s_Instance, "vkDestroyDebugUtilsMessengerEXT");
+            GF_CORE_ASSERT(vkDestroyDebugUtilsMessengerEXT, "Could not load vkDestroyDebugUtilsMessengerEXT");
+            vkDestroyDebugUtilsMessengerEXT(s_Instance, m_DebugMessenger, nullptr);
+        }
+        vkDestroyInstance(s_Instance, nullptr);
+        s_Context = nullptr;
     }
 
     VulkanContext& VulkanContext::Get()

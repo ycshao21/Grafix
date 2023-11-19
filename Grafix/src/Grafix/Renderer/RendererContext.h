@@ -10,6 +10,7 @@ namespace Grafix
         // When a renderer context is created, this function must be called manually.
         virtual void Init() = 0;
         virtual void SwapBuffers() = 0;
+        virtual void Destroy() = 0;
 
         static Shared<RendererContext> Create(void* windowHandle);
     };

@@ -5,6 +5,8 @@
 #include <glad/glad.h>
 
 #include "Grafix/Renderer/Renderer.h"
+#include "Grafix/Renderer/RendererAPI.h"
+#include "Platform/Vulkan/VulkanContext.h"
 
 namespace Grafix
 {
@@ -30,13 +32,14 @@ namespace Grafix
     Application::~Application()
     {
         Renderer::Shutdown();
+        // Note: Layers are destroyed before the window.
     }
 
     void Application::OnEvent(Event& e)
     {
         EventDispatcher dispatcher(e);
         dispatcher.Dispatch<WindowCloseEvent>([this](WindowCloseEvent& e) { return OnWindowClose(e); });
-        ////dispatcher.Dispatch<WindowResizeEvent>([this](WindowResizeEvent& e) { return OnWindowResize(e); });
+        dispatcher.Dispatch<WindowResizeEvent>([this](WindowResizeEvent& e) { return OnWindowResize(e); });
 
         for (auto it = m_LayerStack.end(); it != m_LayerStack.begin(); )
         {
@@ -55,13 +58,17 @@ namespace Grafix
             float ts = time - m_LastFrameTime;
             m_LastFrameTime = time;
 
-            m_Window->BeginFrame();
-
-            for(Layer* layer : m_LayerStack)
-                layer->OnUpdate(ts);
-
             m_Window->PollEvents();
-            m_Window->SwapBuffers();
+
+            if (!m_Minimized)
+            {
+                m_Window->BeginFrame();
+
+                for(Layer* layer : m_LayerStack)
+                    layer->OnUpdate(ts);
+
+                m_Window->SwapBuffers();
+            }
         }
     }
 
@@ -73,6 +80,26 @@ namespace Grafix
     bool Application::OnWindowClose(WindowCloseEvent& e)
     {
         m_IsRunning = false;
+        return false;
+    }
+
+    bool Application::OnWindowResize(WindowResizeEvent& e)
+    {
+        if (e.GetWidth() == 0 || e.GetHeight() == 0)
+        {
+            GF_CORE_WARN("Window minizied.");
+            m_Minimized = true;
+            return false;
+        }
+
+        m_Minimized = false;
+
+        if (RendererAPI::GetType() == RendererAPIType::Vulkan)
+        {
+            auto swapchain = std::dynamic_pointer_cast<VulkanContext>(m_Window->GetContext())->GetSwapchain();
+            swapchain->Resize(e.GetWidth(), e.GetHeight());
+        }
+
         return false;
     }
 }

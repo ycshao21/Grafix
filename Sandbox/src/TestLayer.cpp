@@ -138,7 +138,7 @@ void TestLayer::OnUpdate(float ts)
     m_Camera.SetPosition(m_CameraPosition);
     m_Camera.SetRotation(m_CameraRotation);
 
-    ////Grafix::Renderer::BeginScene(m_Camera);
+    Grafix::Renderer::BeginScene(m_Camera);
 
     ////std::dynamic_pointer_cast<Grafix::OpenGLShader>(m_SquareShader)->Bind();
     ////std::dynamic_pointer_cast<Grafix::OpenGLShader>(m_SquareShader)->UploadUniformFloat4("u_Color", m_SquareColor);
@@ -159,8 +159,6 @@ void TestLayer::OnUpdate(float ts)
     ////        Grafix::Renderer::Submit(m_SquareShader, m_SquareVA, transform);
     ////    }
     ////}
-
-    ////Grafix::Renderer::EndScene();
 
     auto device = Grafix::VulkanContext::Get().GetLogicalDevice()->GetVkDevice();
     auto swapchain = Grafix::VulkanContext::Get().GetSwapchain();
@@ -237,6 +235,8 @@ void TestLayer::OnUpdate(float ts)
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     VK_CHECK(vkEndCommandBuffer(commandBuffer));
+
+    Grafix::Renderer::EndScene();
 }
 
 void TestLayer::OnEvent(Grafix::Event& e)

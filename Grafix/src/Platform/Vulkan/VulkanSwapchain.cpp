@@ -8,20 +8,6 @@
 
 namespace Grafix
 {
-    static std::string PresentModeString(VkPresentModeKHR presentMode)
-    {
-        switch (presentMode)
-        {
-            case VK_PRESENT_MODE_IMMEDIATE_KHR:     return "Immediate";
-            case VK_PRESENT_MODE_MAILBOX_KHR:       return "Mailbox";
-            case VK_PRESENT_MODE_FIFO_KHR:          return "FIFO";
-            case VK_PRESENT_MODE_FIFO_RELAXED_KHR:  return "FIFO Relaxed";
-        }
-
-        GF_CORE_ASSERT(false, "Unknown present mode!");
-        return "";
-    }
-
     void VulkanSwapchain::InitSurface(GLFWwindow* windowHandle)
     {
         // TODO: Make it like this. (Logical device has not been created yet.)
@@ -84,18 +70,6 @@ namespace Grafix
         auto physicalDevice = m_LogicalDevice->GetPhysicalDevice()->GetVkPhysicalDevice();
         auto device = m_LogicalDevice->GetVkDevice();
 
-        // Destroy old resources
-        if (m_Swapchain)
-        {
-            for(auto imageView : m_ImageViews)
-                vkDestroyImageView(device, imageView, nullptr);
-
-            for(auto framebuffer : m_Framebuffers)
-                vkDestroyFramebuffer(device, framebuffer, nullptr);
-
-            vkDestroySwapchainKHR(device, m_Swapchain, nullptr);
-        }
-
         /////////////////////////////////////////////////////////////////////////////////////////////////////////
         // Swapchain
         /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -119,7 +93,6 @@ namespace Grafix
                 break;
             }
         }
-        GF_CORE_INFO("Chosen present mode: {0}", PresentModeString(chosenPresentMode));
 
         // Extent
         VkExtent2D swapchainExtent{};
@@ -136,8 +109,15 @@ namespace Grafix
         }
         m_Extent = std::move(swapchainExtent);
 
-        if(width == 0 || height == 0)
+        if (width == 0 || height == 0)
+        {
+            GF_CORE_WARN("Attempting to create swapchain of size 0. Skip creation.");
             return;
+        }
+
+        m_Width = width;
+        m_Height = height;
+        GF_CORE_INFO("Swapchain size: ({0} ¡Á {1})", m_Width, m_Height);
 
         // Image count
         m_ImageCount = surfaceCapabilities.minImageCount + 1;
@@ -179,6 +159,9 @@ namespace Grafix
 
         swapchainCI.oldSwapchain = VK_NULL_HANDLE;  // This is for resizing, but we set it to null for now.
 
+        if(m_Swapchain)
+            vkDestroySwapchainKHR(device, m_Swapchain, nullptr);
+
         VK_CHECK(vkCreateSwapchainKHR(device, &swapchainCI, nullptr, &m_Swapchain));
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -192,6 +175,9 @@ namespace Grafix
         /////////////////////////////////////////////////////////////////////////////////////////////////////////
         // Image views
         /////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        for(auto imageView : m_ImageViews)
+            vkDestroyImageView(device, imageView, nullptr);
 
         m_ImageViews.resize(m_ImageCount);
         for (uint32_t i = 0; i < m_ImageCount; i++)
@@ -221,51 +207,57 @@ namespace Grafix
         // Render pass
         /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        VkAttachmentDescription colorAttachment{};
-        colorAttachment.format = m_SurfaceFormat.format;
-        colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-        colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;  // Clear the values to a constant at the start
-        colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;  // Rendered contents will be stored in memory and can be read later
-        colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;  // We are not using it for now.
-        colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;  // We are not using it for now.
-        colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+        if (!m_RenderPass)
+        {
+            VkAttachmentDescription colorAttachment{};
+            colorAttachment.format = m_SurfaceFormat.format;
+            colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+            colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;  // Clear the values to a constant at the start
+            colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;  // Rendered contents will be stored in memory and can be read later
+            colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;  // We are not using it for now.
+            colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;  // We are not using it for now.
+            colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+            colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
-        VkAttachmentReference colorAttachmentRef{};
-        colorAttachmentRef.attachment = 0;
-        colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+            VkAttachmentReference colorAttachmentRef{};
+            colorAttachmentRef.attachment = 0;
+            colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
-        // Subpass
-        VkSubpassDescription subpass{};
-        subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-        subpass.colorAttachmentCount = 1;
-        subpass.pColorAttachments = &colorAttachmentRef;
+            // Subpass
+            VkSubpassDescription subpass{};
+            subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+            subpass.colorAttachmentCount = 1;
+            subpass.pColorAttachments = &colorAttachmentRef;
 
-        VkSubpassDependency dependency{};
-        dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-        dependency.dstSubpass = 0;
+            VkSubpassDependency dependency{};
+            dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+            dependency.dstSubpass = 0;
 
-        dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-        dependency.srcAccessMask = 0;
+            dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+            dependency.srcAccessMask = 0;
 
-        dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-        dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+            dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+            dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 
-        // Render pass
-        VkRenderPassCreateInfo renderPassCI{};
-        renderPassCI.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-        renderPassCI.attachmentCount = 1;
-        renderPassCI.pAttachments = &colorAttachment;
-        renderPassCI.subpassCount = 1;
-        renderPassCI.pSubpasses = &subpass;
-        renderPassCI.dependencyCount = 1;
-        renderPassCI.pDependencies = &dependency;
+            // Render pass
+            VkRenderPassCreateInfo renderPassCI{};
+            renderPassCI.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+            renderPassCI.attachmentCount = 1;
+            renderPassCI.pAttachments = &colorAttachment;
+            renderPassCI.subpassCount = 1;
+            renderPassCI.pSubpasses = &subpass;
+            renderPassCI.dependencyCount = 1;
+            renderPassCI.pDependencies = &dependency;
 
-        VK_CHECK(vkCreateRenderPass(device, &renderPassCI, nullptr, &m_RenderPass));
+            VK_CHECK(vkCreateRenderPass(device, &renderPassCI, nullptr, &m_RenderPass));
+        }
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////
         // Framebuffer
         /////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        for(auto framebuffer : m_Framebuffers)
+            vkDestroyFramebuffer(device, framebuffer, nullptr);
 
         m_Framebuffers.resize(m_ImageViews.size());
         for (int i = 0; i < m_ImageViews.size(); ++i)
@@ -286,12 +278,15 @@ namespace Grafix
         /////////////////////////////////////////////////////////////////////////////////////////////////////////
         // Command pool
         /////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-        VkCommandPoolCreateInfo poolCI{};
-        poolCI.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-        poolCI.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;  // Allow command buffers to be rerecorded individually
-        poolCI.queueFamilyIndex = m_GraphicsQueueFamilyIndex;
-        VK_CHECK(vkCreateCommandPool(device, &poolCI, nullptr, &m_CommandPool));
+        
+        if (!m_CommandPool)
+        {
+            VkCommandPoolCreateInfo poolCI{};
+            poolCI.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+            poolCI.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;  // Allow command buffers to be rerecorded individually
+            poolCI.queueFamilyIndex = m_GraphicsQueueFamilyIndex;
+            VK_CHECK(vkCreateCommandPool(device, &poolCI, nullptr, &m_CommandPool));
+        }
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////
         // Command buffers
@@ -310,28 +305,33 @@ namespace Grafix
         // Sync objects
         /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        m_ImageAvailableSemaphores.resize(m_MaxFramesInFlight);
-        m_RenderFinishedSemaphores.resize(m_MaxFramesInFlight);
-        m_InFlightFences.resize(m_MaxFramesInFlight);
-
-        VkSemaphoreCreateInfo semaphoreCI{};
-        semaphoreCI.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-
-        VkFenceCreateInfo fenceCI{};
-        fenceCI.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-        fenceCI.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-
-        for (int i = 0; i < m_MaxFramesInFlight; ++i)
+        // WARN: This might be problematic?
+        if (m_InFlightFences.empty())
         {
-            VK_CHECK(vkCreateSemaphore(device, &semaphoreCI, nullptr, &m_ImageAvailableSemaphores[i]));
-            VK_CHECK(vkCreateSemaphore(device, &semaphoreCI, nullptr, &m_RenderFinishedSemaphores[i]));
-            VK_CHECK(vkCreateFence(device, &fenceCI, nullptr, &m_InFlightFences[i]));
+            m_ImageAvailableSemaphores.resize(m_MaxFramesInFlight);
+            m_RenderFinishedSemaphores.resize(m_MaxFramesInFlight);
+            m_InFlightFences.resize(m_MaxFramesInFlight);
+
+            VkSemaphoreCreateInfo semaphoreCI{};
+            semaphoreCI.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+            VkFenceCreateInfo fenceCI{};
+            fenceCI.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+            fenceCI.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
+            for (int i = 0; i < m_MaxFramesInFlight; ++i)
+            {
+                VK_CHECK(vkCreateSemaphore(device, &semaphoreCI, nullptr, &m_ImageAvailableSemaphores[i]));
+                VK_CHECK(vkCreateSemaphore(device, &semaphoreCI, nullptr, &m_RenderFinishedSemaphores[i]));
+                VK_CHECK(vkCreateFence(device, &fenceCI, nullptr, &m_InFlightFences[i]));
+            }
         }
     }
 
     void VulkanSwapchain::Destroy()
     {
         auto device = m_LogicalDevice->GetVkDevice();
+        vkDeviceWaitIdle(device);
 
         // Destroy sync objects
         for (int i = 0; i < m_MaxFramesInFlight; ++i)
@@ -356,13 +356,23 @@ namespace Grafix
         vkDestroySurfaceKHR(VulkanContext::GetInstance(), m_Surface, nullptr);
     }
 
+    void VulkanSwapchain::Resize(uint32_t width, uint32_t height)
+    {
+        auto device = m_LogicalDevice->GetVkDevice();
+        vkDeviceWaitIdle(device);
+        Create(width, height);
+    }
+
     void VulkanSwapchain::BeginFrame()
     {
         auto device = m_LogicalDevice->GetVkDevice();
         VK_CHECK(vkWaitForFences(device, 1, &m_InFlightFences[m_CurrentBufferIndex], VK_TRUE, UINT64_MAX));
 
         VkResult result = vkAcquireNextImageKHR(device, m_Swapchain, UINT64_MAX, m_ImageAvailableSemaphores[m_CurrentBufferIndex], VK_NULL_HANDLE, &m_CurrentImageIndex);
-        VK_CHECK(result);
+        if (result == VK_ERROR_OUT_OF_DATE_KHR)
+            Resize(m_Width, m_Height);
+        else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
+            VK_CHECK(result);
 
         VK_CHECK(vkResetFences(device, 1, &m_InFlightFences[m_CurrentBufferIndex]));
         VK_CHECK(vkResetCommandBuffer(m_CommandBuffers[m_CurrentBufferIndex], 0));
@@ -404,7 +414,10 @@ namespace Grafix
         presentInfo.pImageIndices = &m_CurrentImageIndex;
         presentInfo.pResults = nullptr;
         VkResult result = vkQueuePresentKHR(m_LogicalDevice->GetPresentQueue(), &presentInfo);
-        VK_CHECK(result);
+        if (result == VK_ERROR_OUT_OF_DATE_KHR)
+            Resize(m_Width, m_Height);
+        else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
+            VK_CHECK(result);
 
         m_CurrentBufferIndex = (m_CurrentBufferIndex + 1) % m_MaxFramesInFlight;
     }

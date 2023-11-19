@@ -31,9 +31,10 @@ namespace Grafix
         void PushLayer(Layer* layer);
     private:
         bool OnWindowClose(WindowCloseEvent& e);
-        ////bool OnWindowResize(WindowResizeEvent& e);
+        bool OnWindowResize(WindowResizeEvent& e);
     private:
         bool m_IsRunning = true;
+        bool m_Minimized = false;
 
         Unique<Window> m_Window = nullptr;
         LayerStack m_LayerStack;

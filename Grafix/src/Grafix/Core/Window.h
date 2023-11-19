@@ -43,6 +43,7 @@ namespace Grafix
         std::pair<uint32_t, uint32_t> GetSize() const { return { m_Data.Width, m_Data.Height }; }
 
         inline void* GetNative() const { return m_Window; }
+        Shared<RendererContext> GetContext() const { return m_Context; }
 
         inline void SetVSync(bool enabled);
         inline bool IsVSync() const { return m_Data.VSync; }

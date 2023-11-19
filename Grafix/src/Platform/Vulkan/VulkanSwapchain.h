@@ -20,6 +20,8 @@ namespace Grafix
         void Create(uint32_t width, uint32_t height);
         void Destroy();
 
+        void Resize(uint32_t width, uint32_t height);
+
         void BeginFrame();
         void Present();
 
@@ -41,7 +43,7 @@ namespace Grafix
     private:
         Shared<VulkanLogicalDevice> m_LogicalDevice = nullptr;
 
-        int m_Width, m_Height;
+        uint32_t m_Width, m_Height;
         VkSurfaceKHR m_Surface = nullptr;
         VkSurfaceFormatKHR m_SurfaceFormat;
         VkExtent2D m_Extent;

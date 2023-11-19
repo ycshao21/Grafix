@@ -26,4 +26,8 @@ namespace Grafix
     {
         glfwSwapBuffers(m_WindowHandle);
     }
+
+    void OpenGLContext::Destroy()
+    {
+    }
 }

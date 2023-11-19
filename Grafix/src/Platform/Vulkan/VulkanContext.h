@@ -21,6 +21,7 @@ namespace Grafix
 
         virtual void Init() override;
         virtual void SwapBuffers() override;
+        virtual void Destroy() override;
 
         static VulkanContext& Get();
         static VkInstance GetInstance() { return s_Instance; }

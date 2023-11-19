@@ -14,6 +14,7 @@ namespace Grafix
 
         virtual void Init() override;
         virtual void SwapBuffers() override;
+        virtual void Destroy() override;
     private:
         GLFWwindow* m_WindowHandle;
     };

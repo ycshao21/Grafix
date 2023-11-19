@@ -99,9 +99,6 @@ namespace Grafix
             GF_CORE_ASSERT(glfwVulkanSupported(), "GLFW does not support Vulkan!");
             // [Vulkan] Since we are using Vulkan, we don't need GLFW to create an OpenGL context.
             glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-            // [Vulkan] Window resizing will break the swapchain, so we disable it here.
-            //          When resizing is supported by the swapchain, this can be removed.
-            glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
         }
 
         // If we need fullscreen, we need to set the 4th parameter to glfwGetPrimaryMonitor()
@@ -212,6 +209,8 @@ namespace Grafix
 
     void Window::Shutdown()
     {
+        m_Context->Destroy();
+
         // Destroy the GLFW window
         glfwDestroyWindow(m_Window);
         m_Window = nullptr;
