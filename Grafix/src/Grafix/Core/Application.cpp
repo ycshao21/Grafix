@@ -36,14 +36,13 @@ namespace Grafix
     {
         EventDispatcher dispatcher(e);
         dispatcher.Dispatch<WindowCloseEvent>([this](WindowCloseEvent& e) { return OnWindowClose(e); });
+        ////dispatcher.Dispatch<WindowResizeEvent>([this](WindowResizeEvent& e) { return OnWindowResize(e); });
 
         for (auto it = m_LayerStack.end(); it != m_LayerStack.begin(); )
         {
             (*--it)->OnEvent(e);
             if (e.Handled)
-            {
                 break;
-            }
         }
     }
 
@@ -56,10 +55,13 @@ namespace Grafix
             float ts = time - m_LastFrameTime;
             m_LastFrameTime = time;
 
+            m_Window->BeginFrame();
+
             for(Layer* layer : m_LayerStack)
                 layer->OnUpdate(ts);
 
-            m_Window->OnUpdate();
+            m_Window->PollEvents();
+            m_Window->SwapBuffers();
         }
     }
 

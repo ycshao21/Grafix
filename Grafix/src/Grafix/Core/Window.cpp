@@ -6,6 +6,7 @@
 #include "Events/MouseEvent.h"
 
 #include "Grafix/Renderer/RendererAPI.h"
+#include "Platform/Vulkan/VulkanContext.h"
 
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
@@ -33,9 +34,19 @@ namespace Grafix
         Shutdown();
     }
 
-    void Window::OnUpdate()
+    void Window::PollEvents()
     {
         glfwPollEvents();
+    }
+
+    void Window::BeginFrame()
+    {
+        if(RendererAPI::GetType() == RendererAPIType::Vulkan)
+            std::dynamic_pointer_cast<VulkanContext>(m_Context)->GetSwapchain()->BeginFrame();
+    }
+
+    void Window::SwapBuffers()
+    {
         m_Context->SwapBuffers();
     }
 
@@ -109,6 +120,7 @@ namespace Grafix
         // ------------------------------------------------------------------------------------------------------------------------------------------
         // Set GLFW Callbacks
         // ------------------------------------------------------------------------------------------------------------------------------------------
+
         glfwSetWindowSizeCallback(m_Window, [](GLFWwindow* window, int width, int height)
         {
             WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);

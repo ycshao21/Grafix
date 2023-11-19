@@ -31,6 +31,7 @@ namespace Grafix
         void PushLayer(Layer* layer);
     private:
         bool OnWindowClose(WindowCloseEvent& e);
+        ////bool OnWindowResize(WindowResizeEvent& e);
     private:
         bool m_IsRunning = true;
 

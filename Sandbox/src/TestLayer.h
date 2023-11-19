@@ -14,7 +14,6 @@ public:
     virtual void OnEvent(Grafix::Event& e) override;
 private:
     void PipelineSetup();
-    void RecordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
 private:
     ///////////////////////////////////////////////////////
     // Vulkan
@@ -24,20 +23,8 @@ private:
     VkShaderModule m_FragmentShaderModule;
 
     VkPipelineLayout m_PipelineLayout;
-    VkRenderPass m_RenderPass;
 
     VkPipeline m_GraphicsPipeline;
-
-    std::vector<VkFramebuffer> m_SwapchainFramebuffers;
-
-    VkCommandPool m_CommandPool;
-    std::vector<VkCommandBuffer> m_CommandBuffers;
-
-    std::vector<VkSemaphore> m_ImageAvailableSemaphores, m_RenderFinishedSemaphores;
-    const uint32_t m_MaxFramesInFlight = 2;
-    std::vector<VkFence> m_InFlightFences;
-
-    uint32_t m_CurrentFrameIndex = 0;
 
     ///////////////////////////////////////////////////////
     // OpenGL

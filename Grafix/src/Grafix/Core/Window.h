@@ -31,9 +31,11 @@ namespace Grafix
         Window& operator=(const Window&) = delete;
     public:
         void Init();
-        void Shutdown();
 
-        void OnUpdate();
+        void BeginFrame();
+        void SwapBuffers();
+
+        void PollEvents();
 
         const std::string& GetTitle() const { return m_Data.Title; }
         uint32_t GetWidth() const { return m_Data.Width; }
@@ -48,6 +50,8 @@ namespace Grafix
         void SetEventCallback(const EventCallbackFn& callback) { m_Data.EventCallback = callback; }
 
         static Unique<Window> Create(const WindowSpecification& spec);
+    private:
+        void Shutdown();
     private:
         struct WindowData
         {
